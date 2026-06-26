@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>QtVS_v304</Keyword>
+    <ProjectGuid>{8D564628-2432-48F9-9BC4-5B26E5F2037E}</ProjectGuid>
+    <RootNamespace>EnvNodeControllerUITests</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>EnvNodeControllerUITests</ProjectName>
+    <QtMsBuild Condition="'$(QtMsBuild)'=='' OR !Exists('$(QtMsBuild)\qt.targets')">$(MSBuildProjectDirectory)\..\..\EnvPlatformController\QtMsBuild</QtMsBuild>
+    <FlightEnvUsePlatformBackend Condition="'$(FlightEnvUsePlatformBackend)'==''">true</FlightEnvUsePlatformBackend>
+    <FlightEnvControllerBackendDefines Condition="'$(FlightEnvUsePlatformBackend)'=='true'">FLIGHTENV_USE_PLATFORM_BACKEND;</FlightEnvControllerBackendDefines>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <Import Project="$(QtMsBuild)\qt_defaults.props" Condition="Exists('$(QtMsBuild)\qt_defaults.props')" />
+  <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <QtInstall>$(FlightEnvQtInstall)</QtInstall>
+    <QtModules>core;gui;widgets;testlib;charts;datavisualization;opengl;openglwidgets;3dcore;3danimation;3dextras;3dinput;3dlogic;3drender</QtModules>
+  </PropertyGroup>
+  <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <QtInstall>6.9.3_msvc2022_64</QtInstall>
+    <QtModules>core;gui;widgets;testlib;charts;datavisualization;opengl;openglwidgets;3dcore;3danimation;3dextras;3dinput;3dlogic;3drender</QtModules>
+  </PropertyGroup>
+  <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <QtInstall>$(FlightEnvQtInstall)</QtInstall>
+    <QtModules>core;gui;widgets;testlib;charts;datavisualization;opengl;openglwidgets;3dcore;3danimation;3dextras;3dinput;3dlogic;3drender</QtModules>
+  </PropertyGroup>
+  <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <QtInstall>6.9.3_msvc2022_64</QtInstall>
+    <QtModules>core;gui;widgets;testlib;charts;datavisualization;opengl;openglwidgets;3dcore;3danimation;3dextras;3dinput;3dlogic;3drender</QtModules>
+  </PropertyGroup>
+  <Target Name="QtInstallNotConfigured" BeforeTargets="PrepareForBuild" Condition="'$(FlightEnvQtInstall)'=='' and '$(DesignTimeBuild)'!='true'">
+    <Error Text="QtInstall is empty. Set QT6_ROOT or pass /p:QtInstall=&lt;Qt6 install root&gt;." />
+  </Target>
+  <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') OR !Exists('$(QtMsBuild)\Qt.props')">
+    <Message Importance="High" Text="QtMsBuild: could not locate qt.targets, qt.props; EnvNodeController UI tests may not build correctly." />
+  </Target>
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(QtMsBuild)\Qt.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(QtMsBuild)\Qt.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(QtMsBuild)\Qt.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(QtMsBuild)\Qt.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <OutDir>$(FlightEnvDepsWorkspaceRoot)\tests\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(FlightEnvDepsWorkspaceRoot)\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <PreprocessorDefinitions>$(FlightEnvControllerBackendDefines)_CONSOLE;_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;GLOG_NO_ABBREVIATED_SEVERITIES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>GeneratedFiles\$(ConfigurationName);GeneratedFiles;$(ProjectDir)..\..;$(ProjectDir)..\..\EnvPlatformController;$(ProjectDir)..\..\EnvPlatformController\ui;$(FlightEnvDepsWorkspaceRoot);$(FlightEnvSharedDepsRoot)\include;$(FlightEnvSharedDepsRoot)\include\ros2include;$(FlightEnvSharedDepsRoot)\include\sensor_msgs_plus\sensor_msgs_plus;$(FlightEnvSharedDepsRoot)\include\VTK\vtk-9.4;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(FlightEnvSharedDepsRoot)\lib\sensor_msgs_plus;$(FlightEnvSharedDepsRoot)\lib\x64;$(FlightEnvSharedDepsRoot)\lib;$(FlightEnvSharedDepsRoot)\lib\ros2;$(FlightEnvSharedDepsRoot)\bin\VTK;$(FlightEnvSharedDepsRoot)\lib\VTK;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(FlightEnvDepsWorkspaceRoot)\$(Platform)\$(Configuration)\FlightEnvNodeSdk.lib;rclcpp.lib;rcl.lib;rcutils.lib;rmw.lib;rmw_implementation.lib;rmw_fastrtps_cpp.lib;fastrtps-2.14.lib;fastcdr-2.2.lib;rosidl_runtime_c.lib;rosidl_typesupport_c.lib;rosidl_typesupport_cpp.lib;std_msgs__rosidl_typesupport_cpp.lib;std_msgs__rosidl_typesupport_fastrtps_cpp.lib;std_srvs__rosidl_typesupport_cpp.lib;libstatistics_collector.lib;std_msgs__rosidl_generator_c.lib;geometry_msgs__rosidl_generator_c.lib;geometry_msgs__rosidl_typesupport_cpp.lib;geometry_msgs__rosidl_typesupport_fastrtps_cpp.lib;rcl_logging_spdlog.lib;statistics_msgs__rosidl_typesupport_cpp.lib;builtin_interfaces__rosidl_typesupport_cpp.lib;rclcpp_action.lib;rcl_action.lib;action_msgs__rosidl_typesupport_cpp.lib;example_interfaces__rosidl_typesupport_cpp.lib;sensor_msgs_plus__rosidl_typesupport_cpp.lib;$(FlightEnvDepsWorkspaceRoot)\$(Platform)\$(Configuration)\EnvPredictorIO.lib;sqlite3.lib;glog.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkzlib-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkCommonCore-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkCommonDataModel-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkCommonMath-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkCommonTransforms-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkRenderingCore-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkRenderingOpenGL2-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkInteractionStyle-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkInteractionWidgets-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkGUISupportQt-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkViewsQt-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkIOGeometry-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkIOImage-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkIOLegacy-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkFiltersCore-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkFiltersGeometry-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtksys-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkFiltersSources-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkCommonColor-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkRenderingAnnotation-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkRenderingFreeType-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkFiltersGeneral-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkCommonExecutionModel-9.4.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\module-demos\common\GraphWorkflowDisplayWidgets.cpp" />
+    <ClCompile Include="..\..\module-demos\common\VtkModelFieldWidget.cpp" />
+    <ClCompile Include="..\..\EnvPlatformController\StreamController.cpp" />
+    <ClCompile Include="..\..\EnvPlatformController\ui\ChartSingleDialog.cpp" />
+    <ClCompile Include="..\..\EnvPlatformController\ui\EnvPredictorUI.cpp" />
+    <ClCompile Include="..\..\EnvPlatformController\ui\EnvPredictorUIProjectConfig.cpp" />
+    <ClCompile Include="..\..\EnvPlatformController\ui\EnvPredictorUiHelpers.cpp" />
+    <ClCompile Include="..\..\EnvPlatformController\ui\VTKSingleDialog.cpp" />
+    <ClCompile Include="..\ui\EnvNodeControllerUITest.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="..\..\EnvPlatformController\StreamController.h" />
+    <QtMoc Include="..\..\EnvPlatformController\ui\ChartSingleDialog.h" />
+    <QtMoc Include="..\..\EnvPlatformController\ui\EnvPredictorUI.h" />
+    <QtMoc Include="..\..\EnvPlatformController\ui\VTKSingleDialog.h" />
+    <QtMoc Include="..\ui\EnvNodeControllerUITest.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="..\..\EnvPlatformController\ui\EnvPredictorUI.ui">
+      <FileType>Document</FileType>
+    </QtUic>
+  </ItemGroup>
+  <ItemGroup>
+    <QtRcc Include="..\..\EnvPlatformController\res.qrc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <Import Project="$(QtMsBuild)\qt.targets" Condition="Exists('$(QtMsBuild)\qt.targets')" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>

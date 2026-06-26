@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="App">
+      <UniqueIdentifier>{2EF9A93B-0626-9FBC-AD56-C56C1FE0910D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Data Hub">
+      <UniqueIdentifier>{FFA35325-C48D-3BDA-2259-F2DC01487F16}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pages">
+      <UniqueIdentifier>{563DE925-9FBB-F2A7-F809-D7573D286415}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shell">
+      <UniqueIdentifier>{EF8F1249-D042-6A05-BE00-41E0B05B9DF0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Widgets">
+      <UniqueIdentifier>{078C96DC-40F8-5B36-A6BF-4D01A1BD7815}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Theme">
+      <UniqueIdentifier>{CA884E85-B510-E9AA-2F6F-ABF7EB95EC4F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{092BE914-ADCC-686C-3186-6FAEAA37EB59}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>App</Filter>
+    </ClCompile>
+    <ClCompile Include="datahub\LiveDataHub.cpp">
+      <Filter>Data Hub</Filter>
+    </ClCompile>
+    <ClCompile Include="datahub\PlatformRunController.cpp">
+      <Filter>Data Hub</Filter>
+    </ClCompile>
+    <ClCompile Include="datahub\AsyncFieldArtifactLoader.cpp">
+      <Filter>Data Hub</Filter>
+    </ClCompile>
+    <ClCompile Include="datahub\BranchRunExplorer.cpp">
+      <Filter>Data Hub</Filter>
+    </ClCompile>
+    <ClCompile Include="datahub\FieldRenderGuard.cpp">
+      <Filter>Data Hub</Filter>
+    </ClCompile>
+    <ClCompile Include="datahub\LegacyRunCatalogSource.cpp">
+      <Filter>Data Hub</Filter>
+    </ClCompile>
+    <ClCompile Include="datahub\PdkUiReaders.cpp">
+      <Filter>Data Hub</Filter>
+    </ClCompile>
+    <ClCompile Include="datahub\PlatformMeshLayoutReader.cpp">
+      <Filter>Data Hub</Filter>
+    </ClCompile>
+    <ClCompile Include="pages\GraphPage.cpp">
+      <Filter>Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="pages\DataPlanePage.cpp">
+      <Filter>Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="pages\OnlinePage.cpp">
+      <Filter>Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="pages\OverviewPage.cpp">
+      <Filter>Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="pages\ObjectPage.cpp">
+      <Filter>Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="pages\ModelsPage.cpp">
+      <Filter>Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="pages\OperatorLibraryPage.cpp">
+      <Filter>Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="pages\ReplayPage.cpp">
+      <Filter>Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="pages\RuntimeHostPage.cpp">
+      <Filter>Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="pages\HealthPage.cpp">
+      <Filter>Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="pages\ConfigPage.cpp">
+      <Filter>Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="pages\DiagnosticsPage.cpp">
+      <Filter>Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="shell\ContextBar.cpp">
+      <Filter>Shell</Filter>
+    </ClCompile>
+    <ClCompile Include="shell\NavRail.cpp">
+      <Filter>Shell</Filter>
+    </ClCompile>
+    <ClCompile Include="shell\RunStatusPill.cpp">
+      <Filter>Shell</Filter>
+    </ClCompile>
+    <ClCompile Include="shell\TwinWorkbenchWindow.cpp">
+      <Filter>Shell</Filter>
+    </ClCompile>
+    <ClCompile Include="widgets\Badge.cpp">
+      <Filter>Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="widgets\KvList.cpp">
+      <Filter>Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="widgets\Meter.cpp">
+      <Filter>Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="widgets\Panel.cpp">
+      <Filter>Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="widgets\StageStrip.cpp">
+      <Filter>Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="widgets\BranchRunExplorerWidgets.cpp">
+      <Filter>Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="widgets\GraphWorkflowDisplayWidgets.cpp">
+      <Filter>Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="widgets\OperatorRenderer.cpp">
+      <Filter>Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="widgets\VtkModelFieldWidget.cpp">
+      <Filter>Widgets</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="theme\Palette.h">
+      <Filter>Theme</Filter>
+    </ClInclude>
+    <ClInclude Include="datahub\AsyncFieldArtifactLoader.h">
+      <Filter>Data Hub</Filter>
+    </ClInclude>
+    <ClInclude Include="datahub\BranchRunExplorer.h">
+      <Filter>Data Hub</Filter>
+    </ClInclude>
+    <ClInclude Include="datahub\FieldRenderGuard.h">
+      <Filter>Data Hub</Filter>
+    </ClInclude>
+    <ClInclude Include="datahub\LegacyRunCatalogSource.h">
+      <Filter>Data Hub</Filter>
+    </ClInclude>
+    <ClInclude Include="datahub\PlatformRunController.h">
+      <Filter>Data Hub</Filter>
+    </ClInclude>
+    <ClInclude Include="datahub\PdkUiReaders.h">
+      <Filter>Data Hub</Filter>
+    </ClInclude>
+    <ClInclude Include="datahub\PlatformMeshLayoutReader.h">
+      <Filter>Data Hub</Filter>
+    </ClInclude>
+    <ClInclude Include="widgets\PageHeader.h">
+      <Filter>Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="widgets\StatusUtil.h">
+      <Filter>Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="widgets\BranchRunExplorerWidgets.h">
+      <Filter>Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="widgets\GraphWorkflowDisplayWidgets.h">
+      <Filter>Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="widgets\OperatorRenderer.h">
+      <Filter>Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="widgets\VtkModelFieldWidget.h">
+      <Filter>Widgets</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="datahub\LiveDataHub.h">
+      <Filter>Data Hub</Filter>
+    </QtMoc>
+    <QtMoc Include="datahub\PlatformRunController.h">
+      <Filter>Data Hub</Filter>
+    </QtMoc>
+    <QtMoc Include="pages\GraphPage.h">
+      <Filter>Pages</Filter>
+    </QtMoc>
+    <QtMoc Include="pages\DataPlanePage.h">
+      <Filter>Pages</Filter>
+    </QtMoc>
+    <QtMoc Include="pages\OnlinePage.h">
+      <Filter>Pages</Filter>
+    </QtMoc>
+    <QtMoc Include="pages\OverviewPage.h">
+      <Filter>Pages</Filter>
+    </QtMoc>
+    <QtMoc Include="pages\ObjectPage.h">
+      <Filter>Pages</Filter>
+    </QtMoc>
+    <QtMoc Include="pages\ModelsPage.h">
+      <Filter>Pages</Filter>
+    </QtMoc>
+    <QtMoc Include="pages\OperatorLibraryPage.h">
+      <Filter>Pages</Filter>
+    </QtMoc>
+    <QtMoc Include="pages\ReplayPage.h">
+      <Filter>Pages</Filter>
+    </QtMoc>
+    <QtMoc Include="pages\RuntimeHostPage.h">
+      <Filter>Pages</Filter>
+    </QtMoc>
+    <QtMoc Include="pages\HealthPage.h">
+      <Filter>Pages</Filter>
+    </QtMoc>
+    <QtMoc Include="pages\ConfigPage.h">
+      <Filter>Pages</Filter>
+    </QtMoc>
+    <QtMoc Include="pages\DiagnosticsPage.h">
+      <Filter>Pages</Filter>
+    </QtMoc>
+    <QtMoc Include="shell\ContextBar.h">
+      <Filter>Shell</Filter>
+    </QtMoc>
+    <QtMoc Include="shell\NavRail.h">
+      <Filter>Shell</Filter>
+    </QtMoc>
+    <QtMoc Include="shell\RunStatusPill.h">
+      <Filter>Shell</Filter>
+    </QtMoc>
+    <QtMoc Include="shell\TwinWorkbenchWindow.h">
+      <Filter>Shell</Filter>
+    </QtMoc>
+    <QtMoc Include="widgets\Badge.h">
+      <Filter>Widgets</Filter>
+    </QtMoc>
+    <QtMoc Include="widgets\KvList.h">
+      <Filter>Widgets</Filter>
+    </QtMoc>
+    <QtMoc Include="widgets\Meter.h">
+      <Filter>Widgets</Filter>
+    </QtMoc>
+    <QtMoc Include="widgets\Panel.h">
+      <Filter>Widgets</Filter>
+    </QtMoc>
+    <QtMoc Include="widgets\StageStrip.h">
+      <Filter>Widgets</Filter>
+    </QtMoc>
+    <QtMoc Include="widgets\BranchRunExplorerWidgets.h">
+      <Filter>Widgets</Filter>
+    </QtMoc>
+  </ItemGroup>
+  <ItemGroup>
+    <QtRcc Include="theme\resources.qrc">
+      <Filter>Resources</Filter>
+    </QtRcc>
+  </ItemGroup>
+</Project>

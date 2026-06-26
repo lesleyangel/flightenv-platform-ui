@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Controller">
+      <UniqueIdentifier>{C3468174-830E-CE8C-1642-6EEE297A2482}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI Under Test">
+      <UniqueIdentifier>{88065999-ABB1-07CD-0883-FD11D0E54F9E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests">
+      <UniqueIdentifier>{DD2514D4-B388-2D50-EB09-7A745B58AC05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Forms">
+      <UniqueIdentifier>{42798C3F-3DC3-BA48-58D3-E32DCB1A2392}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{9C7CFFE2-032D-AFB5-9A99-CAD5B16675FE}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\module-demos\common\GraphWorkflowDisplayWidgets.cpp">
+      <Filter>UI Under Test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\module-demos\common\VtkModelFieldWidget.cpp">
+      <Filter>UI Under Test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\EnvPlatformController\StreamController.cpp">
+      <Filter>Controller</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\EnvPlatformController\ui\ChartSingleDialog.cpp">
+      <Filter>UI Under Test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\EnvPlatformController\ui\EnvPredictorUI.cpp">
+      <Filter>UI Under Test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\EnvPlatformController\ui\EnvPredictorUIProjectConfig.cpp">
+      <Filter>UI Under Test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\EnvPlatformController\ui\EnvPredictorUiHelpers.cpp">
+      <Filter>UI Under Test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\EnvPlatformController\ui\VTKSingleDialog.cpp">
+      <Filter>UI Under Test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ui\EnvNodeControllerUITest.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="..\..\EnvPlatformController\StreamController.h">
+      <Filter>Controller</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\EnvPlatformController\ui\ChartSingleDialog.h">
+      <Filter>UI Under Test</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\EnvPlatformController\ui\EnvPredictorUI.h">
+      <Filter>UI Under Test</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\EnvPlatformController\ui\VTKSingleDialog.h">
+      <Filter>UI Under Test</Filter>
+    </QtMoc>
+    <QtMoc Include="..\ui\EnvNodeControllerUITest.h">
+      <Filter>Tests</Filter>
+    </QtMoc>
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="..\..\EnvPlatformController\ui\EnvPredictorUI.ui">
+      <Filter>Forms</Filter>
+    </QtUic>
+  </ItemGroup>
+  <ItemGroup>
+    <QtRcc Include="..\..\EnvPlatformController\res.qrc">
+      <Filter>Resources</Filter>
+    </QtRcc>
+  </ItemGroup>
+</Project>

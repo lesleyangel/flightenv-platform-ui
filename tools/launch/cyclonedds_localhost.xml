@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CycloneDDS xmlns="https://cdds.io/config">
+  <Domain Id="any">
+    <General>
+      <Interfaces>
+        <NetworkInterface address="127.0.0.1" multicast="false" />
+      </Interfaces>
+      <AllowMulticast>false</AllowMulticast>
+    </General>
+    <Tracing>
+      <Verbosity>config</Verbosity>
+      <OutputFile>cdds.log.${CYCLONEDDS_PID}</OutputFile>
+    </Tracing>
+  </Domain>
+</CycloneDDS>

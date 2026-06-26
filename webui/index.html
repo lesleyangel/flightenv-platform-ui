@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FlightEnv Platform Workbench</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="dist/flightenv-reactflow-editor.css" />
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- 本地 vendored runtime：无 npm / 无外网环境也可打开。 -->
+  <script src="vendor/three.min.js"></script>
+  <script src="vendor/react.production.min.js"></script>
+  <script src="vendor/react-dom.production.min.js"></script>
+  <script src="vendor/babel.min.js"></script>
+
+  <script type="text/babel" src="field3d.jsx"></script>
+  <script src="dist/flightenv-reactflow-editor.js"></script>
+  <script type="text/babel" src="workflow_editor.jsx"></script>
+  <script type="text/babel" src="app.jsx"></script>
+</body>
+</html>

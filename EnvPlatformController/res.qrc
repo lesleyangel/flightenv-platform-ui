@@ -1,0 +1,44 @@
+<RCC>
+    <qresource prefix="/">
+        <file>ui/img/align-bottom-simple.svg</file>
+        <file>ui/img/align-center-horizontal.svg</file>
+        <file>ui/img/align-center-horizontal-simple.svg</file>
+        <file>ui/img/align-center-vertical.svg</file>
+        <file>ui/img/align-center-vertical-simple.svg</file>
+        <file>ui/img/align-left.svg</file>
+        <file>ui/img/align-left-simple.svg</file>
+        <file>ui/img/align-right.svg</file>
+        <file>ui/img/align-right-simple.svg</file>
+        <file>ui/img/arrows-down-up.svg</file>
+        <file>ui/img/arrows-horizontal.svg</file>
+        <file>ui/img/arrows-in.svg</file>
+        <file>ui/img/arrows-in-cardinal.svg</file>
+        <file>ui/img/arrows-in-line-horizontal.svg</file>
+        <file>ui/img/arrows-in-line-vertical.svg</file>
+        <file>ui/img/arrows-out.svg</file>
+        <file>ui/img/arrows-out-cardinal.svg</file>
+        <file>ui/img/baseball.svg</file>
+        <file>ui/img/batthern-1920x1080.png</file>
+        <file>ui/img/bookmark.svg</file>
+        <file>ui/img/book-open-user.svg</file>
+        <file>ui/img/chart-line.svg</file>
+        <file>ui/img/codepen-logo.svg</file>
+        <file>ui/img/codesandbox-logo.svg</file>
+        <file>ui/img/cube.svg</file>
+        <file>ui/img/cube-focus.svg</file>
+        <file>ui/img/cube-transparent.svg</file>
+        <file>ui/img/pulse.svg</file>
+        <file>ui/img/rocket.svg</file>
+        <file>ui/img/rocket-launch.svg</file>
+        <file>ui/img/stack.svg</file>
+        <file>ui/img/stack-minus.svg</file>
+        <file>ui/img/stack-plus.svg</file>
+        <file>ui/img/stack-simple.svg</file>
+        <file>ui/img/usb.svg</file>
+        <file>ui/img/x-fill.svg</file>
+        <file>ui/img/x-thin.svg</file>
+        <file>ui/img/1.png</file>
+        <file>ui/img/2.png</file>
+        <file>ui/img/3.png</file>
+    </qresource>
+</RCC>

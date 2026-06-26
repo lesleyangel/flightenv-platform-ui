@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{D83F9648-9B35-4F76-A0CC-331F3F8368DD}</ProjectGuid>
+    <RootNamespace>FieldPredictionMonitorUi</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>FieldPredictionMonitorUi</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <OutDir>$(FlightEnvDepsWorkspaceRoot)\module-demos\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(FlightEnvDepsWorkspaceRoot)\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <Target Name="FlightEnvQtInstallNotFound" BeforeTargets="PrepareForBuild" Condition="!Exists('$(FlightEnvQtInstall)\include\QtWidgets')">
+    <Error Text="Qt install not found or incomplete: $(FlightEnvQtInstall). Set QT6_ROOT or pass /p:QtInstall=&lt;Qt6 msvc root&gt;." />
+  </Target>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalOptions>/utf-8 /Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+      <PreprocessorDefinitions>NOMINMAX;_WINDOWS;UNICODE;_UNICODE;WIN32;WIN64;QT_WIDGETS_LIB;QT_OPENGLWIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\flightenv-contracts\include;$(FlightEnvDepsWorkspaceRoot);$(FlightEnvDepsWorkspaceRoot)\EnvContracts;$(FlightEnvSharedDepsRoot)\include;$(FlightEnvSharedDepsRoot)\include\ros2include;$(FlightEnvSharedDepsRoot)\include\VTK\vtk-9.4;$(FlightEnvQtInstall)\include;$(FlightEnvQtInstall)\include\QtCore;$(FlightEnvQtInstall)\include\QtGui;$(FlightEnvQtInstall)\include\QtWidgets;$(FlightEnvQtInstall)\include\QtOpenGLWidgets;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(FlightEnvQtInstall)\lib;$(FlightEnvSharedDepsRoot)\lib\ros2;$(FlightEnvSharedDepsRoot)\lib\x64;$(FlightEnvSharedDepsRoot)\lib;$(FlightEnvSharedDepsRoot)\lib\VTK;$(FlightEnvSharedDepsRoot)\bin\VTK;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies Condition="'$(Configuration)'=='Debug'">Qt6Widgetsd.lib;Qt6OpenGLWidgetsd.lib;Qt6Guid.lib;Qt6Cored.lib;rclcpp.lib;rcl.lib;rcutils.lib;rmw.lib;rmw_implementation.lib;rmw_fastrtps_cpp.lib;fastrtps-2.14.lib;fastcdr-2.2.lib;rosidl_runtime_c.lib;rosidl_typesupport_c.lib;rosidl_typesupport_cpp.lib;std_msgs__rosidl_typesupport_cpp.lib;std_msgs__rosidl_typesupport_fastrtps_cpp.lib;std_msgs__rosidl_generator_c.lib;rcl_logging_spdlog.lib;libstatistics_collector.lib;statistics_msgs__rosidl_typesupport_cpp.lib;builtin_interfaces__rosidl_typesupport_cpp.lib;vtksys-9.4d.lib;vtkzlib-9.4.lib;vtkCommonCore-9.4.lib;vtkCommonDataModel-9.4.lib;vtkCommonMath-9.4.lib;vtkRenderingCore-9.4.lib;vtkRenderingOpenGL2-9.4.lib;vtkInteractionStyle-9.4.lib;vtkGUISupportQt-9.4.lib;vtkFiltersCore-9.4.lib;vtkFiltersGeometry-9.4.lib;vtkFiltersSources-9.4.lib;vtkCommonColor-9.4.lib;vtkRenderingAnnotation-9.4.lib;vtkRenderingFreeType-9.4.lib;vtkCommonExecutionModel-9.4.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies Condition="'$(Configuration)'!='Debug'">Qt6Widgets.lib;Qt6OpenGLWidgets.lib;Qt6Gui.lib;Qt6Core.lib;rclcpp.lib;rcl.lib;rcutils.lib;rmw.lib;rmw_implementation.lib;rmw_fastrtps_cpp.lib;fastrtps-2.14.lib;fastcdr-2.2.lib;rosidl_runtime_c.lib;rosidl_typesupport_c.lib;rosidl_typesupport_cpp.lib;std_msgs__rosidl_typesupport_cpp.lib;std_msgs__rosidl_typesupport_fastrtps_cpp.lib;std_msgs__rosidl_generator_c.lib;rcl_logging_spdlog.lib;libstatistics_collector.lib;statistics_msgs__rosidl_typesupport_cpp.lib;builtin_interfaces__rosidl_typesupport_cpp.lib;vtksys-9.4.lib;vtkzlib-9.4.lib;vtkCommonCore-9.4.lib;vtkCommonDataModel-9.4.lib;vtkCommonMath-9.4.lib;vtkRenderingCore-9.4.lib;vtkRenderingOpenGL2-9.4.lib;vtkInteractionStyle-9.4.lib;vtkGUISupportQt-9.4.lib;vtkFiltersCore-9.4.lib;vtkFiltersGeometry-9.4.lib;vtkFiltersSources-9.4.lib;vtkCommonColor-9.4.lib;vtkRenderingAnnotation-9.4.lib;vtkRenderingFreeType-9.4.lib;vtkCommonExecutionModel-9.4.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="FieldPredictionMonitorWidget.cpp" />
+    <ClCompile Include="..\common\RosJsonSubscriber.cpp" />
+    <ClCompile Include="..\common\VtkModelFieldWidget.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="FieldPredictionMonitorWidget.h" />
+    <ClInclude Include="..\common\RosJsonSubscriber.h" />
+    <ClInclude Include="..\common\VtkModelFieldWidget.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>

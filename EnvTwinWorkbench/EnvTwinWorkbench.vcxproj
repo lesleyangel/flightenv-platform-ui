@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{7B2E4C10-9D3A-4F88-B1C2-A1B2C3D4E5F6}</ProjectGuid>
+    <RootNamespace>EnvTwinWorkbench</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>EnvTwinWorkbench</ProjectName>
+    <Keyword>QtVS_v304</Keyword>
+    <QtMsBuild Condition="'$(QtMsBuild)'=='' OR !Exists('$(QtMsBuild)\qt.targets')">$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <Import Project="$(QtMsBuild)\qt_defaults.props" Condition="Exists('$(QtMsBuild)\qt_defaults.props')" />
+  <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <QtInstall>$(FlightEnvQtInstall)</QtInstall>
+    <QtModules>core;gui;widgets;opengl;openglwidgets;charts</QtModules>
+  </PropertyGroup>
+  <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64' and '$(FlightEnvQtInstall)'!=''">
+    <QtInstall>$(FlightEnvQtInstall)</QtInstall>
+    <QtModules>core;gui;widgets;opengl;charts</QtModules>
+  </PropertyGroup>
+  <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64' and '$(FlightEnvQtInstall)'==''">
+    <QtInstall>msvc_qt6</QtInstall>
+    <QtModules>core;gui;widgets;opengl;charts</QtModules>
+  </PropertyGroup>
+  <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') OR !Exists('$(QtMsBuild)\Qt.props')">
+    <Message Importance="High" Text="QtMsBuild: could not locate qt.targets, qt.props; project may not build correctly." />
+  </Target>
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(QtMsBuild)\Qt.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(QtMsBuild)\Qt.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(FlightEnvSharedDepsRoot)\include</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;GLOG_NO_ABBREVIATED_SEVERITIES;_WINDOWS;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;QT_DISABLE_DEPRECATED_BEFORE=0x060000;QT_DEPRECATED_WARNINGS;QT_NO_DEBUG;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>GeneratedFiles\$(ConfigurationName);GeneratedFiles;$(ProjectDir)..\;$(FlightEnvDepsWorkspaceRoot);$(FlightEnvSharedDepsRoot)\include;$(FlightEnvSharedDepsRoot)\include\VTK\vtk-9.4;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard_C>Default</LanguageStandard_C>
+      <Optimization>Disabled</Optimization>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(FlightEnvDepsWorkspaceRoot)\$(Platform)\$(Configuration)\FlightEnvNodeSdk.lib;$(FlightEnvDepsWorkspaceRoot)\$(Platform)\$(Configuration)\EnvPredictorIO.lib;sqlite3.lib;glog.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkzlib-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkCommonCore-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkCommonDataModel-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkCommonMath-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkCommonTransforms-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkRenderingCore-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkRenderingOpenGL2-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkInteractionStyle-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkInteractionWidgets-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkGUISupportQt-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkViewsQt-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkIOGeometry-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkIOImage-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkIOLegacy-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkFiltersCore-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkFiltersGeometry-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtksys-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkFiltersSources-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkCommonColor-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkRenderingAnnotation-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkRenderingFreeType-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkFiltersGeneral-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkCommonExecutionModel-9.4.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(FlightEnvSharedDepsRoot)\lib\x64;$(FlightEnvSharedDepsRoot)\lib;$(FlightEnvSharedDepsRoot)\bin\VTK;$(FlightEnvSharedDepsRoot)\lib\VTK;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="datahub\LiveDataHub.cpp" />
+    <ClCompile Include="datahub\PlatformRunController.cpp" />
+    <ClCompile Include="datahub\AsyncFieldArtifactLoader.cpp" />
+    <ClCompile Include="datahub\BranchRunExplorer.cpp" />
+    <ClCompile Include="datahub\FieldRenderGuard.cpp" />
+    <ClCompile Include="datahub\LegacyRunCatalogSource.cpp" />
+    <ClCompile Include="datahub\PdkUiReaders.cpp" />
+    <ClCompile Include="datahub\PlatformMeshLayoutReader.cpp" />
+    <ClCompile Include="pages\GraphPage.cpp" />
+    <ClCompile Include="pages\DataPlanePage.cpp" />
+    <ClCompile Include="pages\OnlinePage.cpp" />
+    <ClCompile Include="pages\OverviewPage.cpp" />
+    <ClCompile Include="pages\ObjectPage.cpp" />
+    <ClCompile Include="pages\ModelsPage.cpp" />
+    <ClCompile Include="pages\OperatorLibraryPage.cpp" />
+    <ClCompile Include="pages\ReplayPage.cpp" />
+    <ClCompile Include="pages\RuntimeHostPage.cpp" />
+    <ClCompile Include="pages\HealthPage.cpp" />
+    <ClCompile Include="pages\ConfigPage.cpp" />
+    <ClCompile Include="pages\DiagnosticsPage.cpp" />
+    <ClCompile Include="shell\ContextBar.cpp" />
+    <ClCompile Include="shell\NavRail.cpp" />
+    <ClCompile Include="shell\RunStatusPill.cpp" />
+    <ClCompile Include="shell\TwinWorkbenchWindow.cpp" />
+    <ClCompile Include="widgets\Badge.cpp" />
+    <ClCompile Include="widgets\KvList.cpp" />
+    <ClCompile Include="widgets\Meter.cpp" />
+    <ClCompile Include="widgets\Panel.cpp" />
+    <ClCompile Include="widgets\StageStrip.cpp" />
+    <ClCompile Include="widgets\BranchRunExplorerWidgets.cpp" />
+    <ClCompile Include="widgets\GraphWorkflowDisplayWidgets.cpp" />
+    <ClCompile Include="widgets\OperatorRenderer.cpp" />
+    <ClCompile Include="widgets\VtkModelFieldWidget.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="datahub\LiveDataHub.h" />
+    <QtMoc Include="datahub\PlatformRunController.h" />
+    <QtMoc Include="pages\GraphPage.h" />
+    <QtMoc Include="pages\DataPlanePage.h" />
+    <QtMoc Include="pages\OnlinePage.h" />
+    <QtMoc Include="pages\OverviewPage.h" />
+    <QtMoc Include="pages\ObjectPage.h" />
+    <QtMoc Include="pages\ModelsPage.h" />
+    <QtMoc Include="pages\OperatorLibraryPage.h" />
+    <QtMoc Include="pages\ReplayPage.h" />
+    <QtMoc Include="pages\RuntimeHostPage.h" />
+    <QtMoc Include="pages\HealthPage.h" />
+    <QtMoc Include="pages\ConfigPage.h" />
+    <QtMoc Include="pages\DiagnosticsPage.h" />
+    <QtMoc Include="shell\ContextBar.h" />
+    <QtMoc Include="shell\NavRail.h" />
+    <QtMoc Include="shell\RunStatusPill.h" />
+    <QtMoc Include="shell\TwinWorkbenchWindow.h" />
+    <QtMoc Include="widgets\Badge.h" />
+    <QtMoc Include="widgets\KvList.h" />
+    <QtMoc Include="widgets\Meter.h" />
+    <QtMoc Include="widgets\Panel.h" />
+    <QtMoc Include="widgets\StageStrip.h" />
+    <QtMoc Include="widgets\BranchRunExplorerWidgets.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="theme\Palette.h" />
+    <ClInclude Include="datahub\AsyncFieldArtifactLoader.h" />
+    <ClInclude Include="datahub\BranchRunExplorer.h" />
+    <ClInclude Include="datahub\FieldRenderGuard.h" />
+    <ClInclude Include="datahub\LegacyRunCatalogSource.h" />
+    <ClInclude Include="datahub\PlatformRunController.h" />
+    <ClInclude Include="datahub\PdkUiReaders.h" />
+    <ClInclude Include="datahub\PlatformMeshLayoutReader.h" />
+    <ClInclude Include="widgets\PageHeader.h" />
+    <ClInclude Include="widgets\StatusUtil.h" />
+    <ClInclude Include="widgets\BranchRunExplorerWidgets.h" />
+    <ClInclude Include="widgets\GraphWorkflowDisplayWidgets.h" />
+    <ClInclude Include="widgets\OperatorRenderer.h" />
+    <ClInclude Include="widgets\VtkModelFieldWidget.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtRcc Include="theme\resources.qrc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <Import Project="$(QtMsBuild)\qt.targets" Condition="Exists('$(QtMsBuild)\qt.targets')" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

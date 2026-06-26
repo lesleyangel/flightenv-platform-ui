@@ -1,0 +1,18 @@
+{
+  "name": "flightenv-web-platform-workbench",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite --host 127.0.0.1"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "^5.0.0",
+    "@xyflow/react": "^12.11.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "vite": "^7.0.0"
+  },
+  "devDependencies": {}
+}

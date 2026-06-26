@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <PropertyGroup>
+    <FlightEnvRepoRoot>$(MSBuildThisFileDirectory)</FlightEnvRepoRoot>
+    <FlightEnvEnableQtDebuggerPath>true</FlightEnvEnableQtDebuggerPath>
+  </PropertyGroup>
+  <Import Project="$(MSBuildThisFileDirectory)..\tools\msbuild\FlightEnvWorkspace.props" />
+  <PropertyGroup Label="FlightEnvPlatformUiWorkspacePaths">
+    <IntDir>$(FlightEnvDepsWorkspaceRoot)\obj\$(MSBuildProjectName)\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+</Project>

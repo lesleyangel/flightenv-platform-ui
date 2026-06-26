@@ -1,0 +1,26 @@
+# Build and editor outputs
+.vs/
+x64/
+Win32/
+Debug/
+Release/
+artifacts/
+.deps/
+_deps/
+TestResults/
+cdds.log.*
+*.user
+*.suo
+*.log
+*.tmp
+*.zip
+__pycache__/
+*/__pycache__/
+webui/node_modules/
+webui/.vite/
+*.obj
+*.iobj
+*.pdb
+*.ipdb
+*.ilk
+
