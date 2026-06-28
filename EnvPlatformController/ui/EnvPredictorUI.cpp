@@ -3650,43 +3650,6 @@ void EnvPredictorUI::initScatterChart()
 */
 void EnvPredictorUI::initFlightAttitudeWidget()
 {
-#ifdef FLIGHTENV_USE_PLATFORM_BACKEND
-    try {
-        if (controller_backend_) {
-            controller_backend_->stop_online_run();
-        }
-    } catch (const std::exception& e) {
-        RCLCPP_ERROR(envUiLogger(), "UI stop/reset failed: %s", e.what());
-    } catch (...) {
-        RCLCPP_ERROR(envUiLogger(), "UI stop/reset failed: unknown exception");
-    }
-    runtime_initialized_ = false;
-    platformStreamingPaused_ = false;
-    platform_snapshot_ = {};
-    platformFrameLoops_.clear();
-    platformCurrentBranchId_.clear();
-    platformCurrentLoop_ = -1;
-    platformLastRenderedFrameSignature_.clear();
-    platformFieldControlSignature_.clear();
-    platformLastRunTimelinePath_.clear();
-    platformLastRunTimelineMtimeMs_ = -1;
-    platformLastRunTimelineSize_ = -1;
-    platformLastCoreParameterLoop_ = -1000000000;
-    if (platformFrameSlider_) {
-        const QSignalBlocker blocker(platformFrameSlider_);
-        platformFrameSlider_->setRange(0, 0);
-        platformFrameSlider_->setValue(0);
-    }
-    if (platformFrameProgressLabel_) {
-        platformFrameProgressLabel_->setText(QStringLiteral("0/0"));
-    }
-    if (platformFrameStatusLabel_) {
-        platformFrameStatusLabel_->setText(QStringLiteral("已中止，点击开始重新运行"));
-    }
-    ui.startBtn->setText(QStringLiteral("开始/继续"));
-    RCLCPP_INFO(envUiLogger(), "Platform UI stop/reset requested from timeline panel.");
-    return;
-#endif
     vtkXYZDlg = new VTKSingleDialog("", "", ui.flightAttitudeWidget);
     vtkXYZDlg->setRotationAnimationTimer();
     std::string stlFilePath = MODELFLIGHTSTLDIR;
@@ -7467,6 +7430,43 @@ void EnvPredictorUI::on_pauseBtn_clicked() {//暂停
 }
 
 void EnvPredictorUI::on_resetBtn_clicked() {//复位
+#ifdef FLIGHTENV_USE_PLATFORM_BACKEND
+    try {
+        if (controller_backend_) {
+            controller_backend_->stop_online_run();
+        }
+    } catch (const std::exception& e) {
+        RCLCPP_ERROR(envUiLogger(), "UI stop/reset failed: %s", e.what());
+    } catch (...) {
+        RCLCPP_ERROR(envUiLogger(), "UI stop/reset failed: unknown exception");
+    }
+    runtime_initialized_ = false;
+    platformStreamingPaused_ = false;
+    platform_snapshot_ = {};
+    platformFrameLoops_.clear();
+    platformCurrentBranchId_.clear();
+    platformCurrentLoop_ = -1;
+    platformLastRenderedFrameSignature_.clear();
+    platformFieldControlSignature_.clear();
+    platformLastRunTimelinePath_.clear();
+    platformLastRunTimelineMtimeMs_ = -1;
+    platformLastRunTimelineSize_ = -1;
+    platformLastCoreParameterLoop_ = -1000000000;
+    if (platformFrameSlider_) {
+        const QSignalBlocker blocker(platformFrameSlider_);
+        platformFrameSlider_->setRange(0, 0);
+        platformFrameSlider_->setValue(0);
+    }
+    if (platformFrameProgressLabel_) {
+        platformFrameProgressLabel_->setText(QStringLiteral("0/0"));
+    }
+    if (platformFrameStatusLabel_) {
+        platformFrameStatusLabel_->setText(QStringLiteral("已中止，点击开始重新运行"));
+    }
+    ui.startBtn->setText(QStringLiteral("开始/继续"));
+    RCLCPP_INFO(envUiLogger(), "Platform UI stop/reset requested from timeline panel.");
+    return;
+#endif
     vtkXYZDlg = new VTKSingleDialog("", "", ui.flightAttitudeWidget);
     vtkXYZDlg->setRotationAnimationTimer();
     std::string stlFilePath = MODELFLIGHTSTLDIR;
