@@ -26,7 +26,6 @@
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectName>EnvPlatformController</ProjectName>
     <TargetName>EnvPlatformController</TargetName>
-    <FlightEnvUsePlatformBackend>true</FlightEnvUsePlatformBackend>
     <Keyword>QtVS_v304</Keyword>
     <QtMsBuild Condition="'$(QtMsBuild)'=='' AND Exists('$(LOCALAPPDATA)\QtMsBuild\qt.targets') AND Exists('$(LOCALAPPDATA)\QtMsBuild\Qt.props')">$(LOCALAPPDATA)\QtMsBuild</QtMsBuild>
     <QtMsBuild Condition="'$(QtMsBuild)'=='' OR !Exists('$(QtMsBuild)\qt.targets')">$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild>
@@ -102,29 +101,24 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <FlightEnvNodeSdkRoot Condition="'$(FlightEnvNodeSdkRoot)'==''">$(MSBuildThisFileDirectory)..\..\flightenv-node-sdk</FlightEnvNodeSdkRoot>
-    <FlightEnvControllerBackendDefines Condition="'$(FlightEnvUsePlatformBackend)'=='true'">FLIGHTENV_USE_PLATFORM_BACKEND;</FlightEnvControllerBackendDefines>
     <IntDir>$(FlightEnvDepsWorkspaceRoot)\obj\EnvPlatformController\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(FlightEnvSharedDepsRoot)\include\ros2include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(FlightEnvSharedDepsRoot)\include\sensor_msgs_plus\sensor_msgs_plus;$(FlightEnvSharedDepsRoot)\include</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(FlightEnvSharedDepsRoot)\include</IncludePath>
     <LocalDebuggerCommand>$(FlightEnvDepsWorkspaceRoot)\$(Platform)\$(Configuration)\$(TargetName)$(TargetExt)</LocalDebuggerCommand>
     <LocalDebuggerWorkingDirectory>$(MSBuildProjectDirectory)\..\..\_deps\example</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerEnvironment>RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-ROS_LOCALHOST_ONLY=0
-ROS_DOMAIN_ID=0
-CYCLONEDDS_URI=file://$(MSBuildProjectDirectory)\..\..\tools\launch\cyclonedds_localhost.xml
-FLIGHTENV_DEPS_WORKSPACE_ROOT=$(MSBuildProjectDirectory)\..\..\_deps\workspace
+    <LocalDebuggerEnvironment>FLIGHTENV_DEPS_WORKSPACE_ROOT=$(MSBuildProjectDirectory)\..\..\_deps\workspace
 FLIGHTENV_SHARED_DEPS_ROOT=$(MSBuildProjectDirectory)\..\..\_deps
 FLIGHTENV_WORKSPACE_ROOT=$(MSBuildProjectDirectory)\..\..
 FLIGHTENV_PLATFORM_OBJECT_ROOT=$(MSBuildProjectDirectory)\..\..\flightenv-object-reentry-vehicle
-PATH=$(FlightEnvDepsWorkspaceRoot)\$(Platform)\$(Configuration);C:\Qt6\6.2.0\msvc2019_64\bin;$(FlightEnvSharedDepsRoot)\bin\ros2_runtime;$(FlightEnvSharedDepsRoot)\bin\qt_runtime;$(FlightEnvSharedDepsRoot)\bin\visualization_runtime;$(FlightEnvSharedDepsRoot)\bin\third_party_runtime;$(FlightEnvSharedDepsRoot)\bin\legacy_support_runtime;$(FlightEnvSharedDepsRoot)\bin;$(FlightEnvSharedDepsRoot)\bin\$(Platform);$(FlightEnvSharedDepsRoot)\bin\sensor_msgs_plus;$(FlightEnvSharedDepsRoot)\bin\VTK;$(FlightEnvSharedDepsRoot)\lib\ros2;$(FlightEnvSharedDepsRoot)\lib\x64;$(FlightEnvSharedDepsRoot)\lib;%PATH%</LocalDebuggerEnvironment>
+PATH=$(FlightEnvDepsWorkspaceRoot)\$(Platform)\$(Configuration);C:\Qt6\6.2.0\msvc2019_64\bin;$(FlightEnvSharedDepsRoot)\bin\qt_runtime;$(FlightEnvSharedDepsRoot)\bin\visualization_runtime;$(FlightEnvSharedDepsRoot)\bin\third_party_runtime;$(FlightEnvSharedDepsRoot)\bin;$(FlightEnvSharedDepsRoot)\bin\$(Platform);$(FlightEnvSharedDepsRoot)\bin\VTK;$(FlightEnvSharedDepsRoot)\lib\x64;$(FlightEnvSharedDepsRoot)\lib;%PATH%</LocalDebuggerEnvironment>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>$(FlightEnvControllerBackendDefines)WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -139,7 +133,7 @@ PATH=$(FlightEnvDepsWorkspaceRoot)\$(Platform)\$(Configuration);C:\Qt6\6.2.0\msv
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>$(FlightEnvControllerBackendDefines)WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -153,9 +147,9 @@ PATH=$(FlightEnvDepsWorkspaceRoot)\$(Platform)\$(Configuration);C:\Qt6\6.2.0\msv
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>$(FlightEnvControllerBackendDefines)_DEBUG;_CONSOLE;_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>GeneratedFiles\$(ConfigurationName);GeneratedFiles;$(ProjectDir)..\;$(FlightEnvNodeSdkRoot)\include;$(FlightEnvDepsWorkspaceRoot);$(FlightEnvSharedDepsRoot)\include;$(FlightEnvSharedDepsRoot)\include\ros2include;$(FlightEnvSharedDepsRoot)\include\sensor_msgs_plus\sensor_msgs_plus;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>GeneratedFiles\$(ConfigurationName);GeneratedFiles;$(ProjectDir)..\;$(FlightEnvNodeSdkRoot)\include;$(FlightEnvDepsWorkspaceRoot);$(FlightEnvSharedDepsRoot)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalOptions>/utf-8
  %(AdditionalOptions)</AdditionalOptions>
@@ -164,8 +158,8 @@ PATH=$(FlightEnvDepsWorkspaceRoot)\$(Platform)\$(Configuration);C:\Qt6\6.2.0\msv
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(FlightEnvSharedDepsRoot)\lib\ros2;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(FlightEnvDepsWorkspaceRoot)\$(Platform)\$(Configuration)\FlightEnvNodeSdk.lib;rclcpp.lib;rcl.lib;rcutils.lib;rmw_fastrtps_cpp.lib;rmw.lib;fastrtps-2.6.lib;fastcdr-1.0.lib;std_msgs__rosidl_typesupport_cpp.lib;std_msgs__rosidl_typesupport_fastrtps_cpp.lib;std_msgs__rosidl_generator_c.lib;geometry_msgs__rosidl_generator_c.lib;geometry_msgs__rosidl_typesupport_cpp.lib;geometry_msgs__rosidl_typesupport_fastrtps_cpp.lib;rcl_logging_spdlog.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(FlightEnvSharedDepsRoot)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(FlightEnvDepsWorkspaceRoot)\$(Platform)\$(Configuration)\FlightEnvNodeSdk.lib;glog.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -174,9 +168,9 @@ PATH=$(FlightEnvDepsWorkspaceRoot)\$(Platform)\$(Configuration);C:\Qt6\6.2.0\msv
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>false</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>$(FlightEnvControllerBackendDefines)NDEBUG;_CONSOLE;_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;GLOG_NO_ABBREVIATED_SEVERITIES;_WINDOWS;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;QT_DISABLE_DEPRECATED_BEFORE=0x060000;QT_DEPRECATED_WARNINGS;QT_NO_DEBUG;QT_QMLMODELS_LIB;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;GLOG_NO_ABBREVIATED_SEVERITIES;_WINDOWS;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;QT_DISABLE_DEPRECATED_BEFORE=0x060000;QT_DEPRECATED_WARNINGS;QT_NO_DEBUG;QT_QMLMODELS_LIB;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>GeneratedFiles\$(ConfigurationName);GeneratedFiles;$(ProjectDir)..\;$(FlightEnvNodeSdkRoot)\include;$(FlightEnvDepsWorkspaceRoot);$(FlightEnvSharedDepsRoot)\include;$(FlightEnvSharedDepsRoot)\include\ros2include;$(FlightEnvSharedDepsRoot)\include\sensor_msgs_plus\sensor_msgs_plus;$(FlightEnvSharedDepsRoot)\include\VTK\vtk-9.4;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>GeneratedFiles\$(ConfigurationName);GeneratedFiles;$(ProjectDir)..\;$(FlightEnvNodeSdkRoot)\include;$(FlightEnvDepsWorkspaceRoot);$(FlightEnvSharedDepsRoot)\include;$(FlightEnvSharedDepsRoot)\include\VTK\vtk-9.4;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>Default</LanguageStandard_C>
@@ -187,23 +181,25 @@ PATH=$(FlightEnvDepsWorkspaceRoot)\$(Platform)\$(Configuration);C:\Qt6\6.2.0\msv
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(FlightEnvDepsWorkspaceRoot)\$(Platform)\$(Configuration)\FlightEnvNodeSdk.lib;rclcpp.lib;rcl.lib;rcutils.lib;rmw.lib;rmw_implementation.lib;rmw_fastrtps_cpp.lib;fastrtps-2.14.lib;fastcdr-2.2.lib;rosidl_runtime_c.lib;rosidl_typesupport_c.lib;rosidl_typesupport_cpp.lib;std_msgs__rosidl_typesupport_cpp.lib;std_msgs__rosidl_typesupport_fastrtps_cpp.lib;std_srvs__rosidl_typesupport_cpp.lib;libstatistics_collector.lib;std_msgs__rosidl_generator_c.lib;geometry_msgs__rosidl_generator_c.lib;geometry_msgs__rosidl_typesupport_cpp.lib;geometry_msgs__rosidl_typesupport_fastrtps_cpp.lib;rcl_logging_spdlog.lib;statistics_msgs__rosidl_typesupport_cpp.lib;builtin_interfaces__rosidl_typesupport_cpp.lib;rclcpp_action.lib;rcl_action.lib;action_msgs__rosidl_typesupport_cpp.lib;example_interfaces__rosidl_typesupport_cpp.lib;sensor_msgs_plus__rosidl_typesupport_cpp.lib;$(FlightEnvDepsWorkspaceRoot)\$(Platform)\$(Configuration)\EnvPredictorIO.lib;sqlite3.lib;glog.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkzlib-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkCommonCore-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkCommonDataModel-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkCommonMath-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkCommonTransforms-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkRenderingCore-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkRenderingOpenGL2-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkInteractionStyle-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkInteractionWidgets-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkGUISupportQt-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkViewsQt-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkIOGeometry-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkIOImage-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkIOLegacy-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkFiltersCore-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkFiltersGeometry-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtksys-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkFiltersSources-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkCommonColor-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkRenderingAnnotation-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkRenderingFreeType-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkFiltersGeneral-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkCommonExecutionModel-9.4.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(FlightEnvSharedDepsRoot)\lib\sensor_msgs_plus;$(FlightEnvSharedDepsRoot)\lib\x64;$(FlightEnvSharedDepsRoot)\lib;$(FlightEnvSharedDepsRoot)\lib\ros2;$(FlightEnvSharedDepsRoot)\bin\VTK;$(FlightEnvSharedDepsRoot)\lib\VTK;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(FlightEnvDepsWorkspaceRoot)\$(Platform)\$(Configuration)\FlightEnvNodeSdk.lib;$(FlightEnvDepsWorkspaceRoot)\$(Platform)\$(Configuration)\EnvPredictorIO.lib;sqlite3.lib;glog.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkzlib-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkCommonCore-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkCommonDataModel-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkCommonMath-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkCommonTransforms-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkRenderingCore-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkRenderingOpenGL2-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkInteractionStyle-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkInteractionWidgets-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkGUISupportQt-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkViewsQt-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkIOGeometry-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkIOImage-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkIOLegacy-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkFiltersCore-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkFiltersGeometry-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtksys-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkFiltersSources-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkCommonColor-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkRenderingAnnotation-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkRenderingFreeType-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkFiltersGeneral-9.4.lib;$(FlightEnvSharedDepsRoot)\lib\VTK\vtkCommonExecutionModel-9.4.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(FlightEnvSharedDepsRoot)\lib\x64;$(FlightEnvSharedDepsRoot)\lib;$(FlightEnvSharedDepsRoot)\bin\VTK;$(FlightEnvSharedDepsRoot)\lib\VTK;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\module-demos\common\GraphWorkflowDisplayWidgets.cpp" />
     <ClCompile Include="..\module-demos\common\VtkModelFieldWidget.cpp" />
-    <ClCompile Include="StreamController.cpp" />
     <ClCompile Include="ui\ChartSingleDialog.cpp" />
     <ClCompile Include="ui\EnvPredictorUI.cpp" />
+    <ClCompile Include="ui\EnvPredictorUIGraphRuntime.cpp" />
+    <ClCompile Include="ui\EnvPredictorUIObjectRuntimePage.cpp" />
+    <ClCompile Include="ui\EnvPredictorUIPlatformTimeline.cpp" />
     <ClCompile Include="ui\EnvPredictorUIProjectConfig.cpp" />
+    <ClCompile Include="ui\EnvPredictorUISensorConfigPage.cpp" />
     <ClCompile Include="ui\EnvPredictorUiHelpers.cpp" />
     <ClCompile Include="ui\main.cpp" />
     <ClCompile Include="ui\VTKSingleDialog.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="StreamController.h" />
     <QtMoc Include="ui\ChartSingleDialog.h" />
     <QtMoc Include="ui\EnvPredictorUI.h" />
     <QtMoc Include="ui\VTKSingleDialog.h" />
@@ -211,6 +207,7 @@ PATH=$(FlightEnvDepsWorkspaceRoot)\$(Platform)\$(Configuration);C:\Qt6\6.2.0\msv
   <ItemGroup>
     <ClInclude Include="..\module-demos\common\GraphWorkflowDisplayWidgets.h" />
     <ClInclude Include="..\module-demos\common\VtkModelFieldWidget.h" />
+    <ClInclude Include="ui\EnvPredictorUIInternal.h" />
     <ClInclude Include="ui\EnvPredictorUiHelpers.h" />
   </ItemGroup>
   <ItemGroup>

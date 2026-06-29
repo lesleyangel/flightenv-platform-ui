@@ -20,6 +20,9 @@
     <Filter Include="UI\Support">
       <UniqueIdentifier>{46996804-6CB1-4987-A87D-7112E2AEED41}</UniqueIdentifier>
     </Filter>
+    <Filter Include="UI\Pages">
+      <UniqueIdentifier>{05A6B463-3C5B-4F5C-9A10-7F5A44F7E2E3}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Shared Widgets">
       <UniqueIdentifier>{6EF0E260-D149-4E77-963B-4C35FD32862E}</UniqueIdentifier>
     </Filter>
@@ -32,11 +35,20 @@
     <ClCompile Include="ui\main.cpp">
       <Filter>App</Filter>
     </ClCompile>
-    <ClCompile Include="StreamController.cpp">
-      <Filter>Controller</Filter>
-    </ClCompile>
     <ClCompile Include="ui\EnvPredictorUI.cpp">
       <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\EnvPredictorUIGraphRuntime.cpp">
+      <Filter>UI\Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\EnvPredictorUIObjectRuntimePage.cpp">
+      <Filter>UI\Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\EnvPredictorUIPlatformTimeline.cpp">
+      <Filter>UI\Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\EnvPredictorUISensorConfigPage.cpp">
+      <Filter>UI\Pages</Filter>
     </ClCompile>
     <ClCompile Include="ui\ChartSingleDialog.cpp">
       <Filter>UI\Dialogs</Filter>
@@ -63,9 +75,6 @@
     </QtUic>
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="StreamController.h">
-      <Filter>Controller</Filter>
-    </QtMoc>
     <QtMoc Include="ui\EnvPredictorUI.h">
       <Filter>UI</Filter>
     </QtMoc>
@@ -78,6 +87,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ui\EnvPredictorUiHelpers.h">
+      <Filter>UI\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\EnvPredictorUIInternal.h">
       <Filter>UI\Support</Filter>
     </ClInclude>
     <ClInclude Include="..\module-demos\common\GraphWorkflowDisplayWidgets.h">

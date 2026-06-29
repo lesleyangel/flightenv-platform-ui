@@ -9,6 +9,7 @@
 #include "ui_EnvPredictorUI.h"
 #include <QMainWindow>
 #include <QPointer>
+#include <QPlainTextEdit>
 #include <qdialog.h>
 #include <QVector3D>
 #include <QTimer>
@@ -56,10 +57,7 @@
 
 #include "VTKSingleDialog.h"
 #include "ChartSingleDialog.h"
-#include "StreamController.h"
-#include "EnvNodeSupport/ControllerViewAdapter.h"
 #include "EnvNodeSupport/IControllerBackend.h"
-#include "EnvNodeSupport/LegacyRosControllerBackend.h"
 #include "EnvNodeSupport/PlatformControllerBackend.h"
 class QTableWidget; class QTreeView; class QStandardItemModel;
 class QLineEdit; class QComboBox; class QPlainTextEdit; class QSpinBox; class QDoubleSpinBox;
@@ -90,10 +88,7 @@ class EnvPredictorUI : public QMainWindow
 
 public:
 
-    explicit EnvPredictorUI(
-        QWidget* parent,
-        std::shared_ptr<StreamController> node,
-        std::shared_ptr<launchsupport::LaunchSession<StreamController>> session);
+    explicit EnvPredictorUI(QWidget* parent = nullptr);
     ~EnvPredictorUI();
     void prepareForShutdown();
 
@@ -201,8 +196,22 @@ private slots:
 private:
     void buildAcqAndConfigFlat_();   // 构建平铺布局
     void buildRuntimeChainPage_();
+    void buildTrainingCliControls_(QVBoxLayout* layout, QWidget* parent);
+    void hideLegacyInlineTrainingButtons_();
     void refreshRuntimeChainPage_();
     void applyPlatformRunConfigFromUi_();
+    QString workspaceRootPath_() const;
+    QString defaultTrainingProjectConfigPath_() const;
+    QString defaultTrainingOutputRootPath_() const;
+    QString currentTrainingProjectConfigPath_() const;
+    QString currentTrainingOutputRootPath_() const;
+    void setTrainingStatus_(const QString& text);
+    void appendTrainingLog_(const QString& text);
+    void initializeObjectModel_();
+    bool loadTrainingProjectConfig_(const QString& path);
+    bool saveTrainingProjectConfig_(const QString& path);
+    void startTrainingCli_();
+    void finishTrainingCli_(int exitCode, bool normalExit);
     void rebuildObjectSensorView_();
     void buildGraphRuntimePage_();
     void startGraphRuntimeRunner_();
@@ -235,11 +244,33 @@ private:
     QSpinBox* objectPredictionEveryFramesSpin_ = nullptr;
     QSpinBox* objectFutureMaxIterationsSpin_ = nullptr;
     QSpinBox* objectBranchChunkIterationsSpin_ = nullptr;
+    QSpinBox* objectBranchCountSpin_ = nullptr;
     QSpinBox* objectMaxConcurrentBranchesSpin_ = nullptr;
+    QSpinBox* objectRefreshIntervalMsSpin_ = nullptr;
     QDoubleSpinBox* objectReplayTimeScaleSpin_ = nullptr;
     QLineEdit* objectSensorStreamEdit_ = nullptr;
+    QLineEdit* objectTrajectoryInputEdit_ = nullptr;
     QLabel* objectRunConfigHint_ = nullptr;
     QPushButton* objectTrainButton_ = nullptr;
+    QLineEdit* trainingProjectConfigEdit_ = nullptr;
+    QLineEdit* trainingOutputRootEdit_ = nullptr;
+    QLineEdit* trainingDbPathEdit_ = nullptr;
+    QLineEdit* trainingTaskIdsEdit_ = nullptr;
+    QLineEdit* trainingFieldIdsEdit_ = nullptr;
+    QLineEdit* trainingSensorIdsEdit_ = nullptr;
+    QLineEdit* trainingBaseIdsEdit_ = nullptr;
+    QCheckBox* trainingUsePodDatabaseCheck_ = nullptr;
+    QLabel* trainingStatusLabel_ = nullptr;
+    QPlainTextEdit* trainingLogEdit_ = nullptr;
+    QPushButton* trainingStartButton_ = nullptr;
+    QPushButton* trainingLoadConfigButton_ = nullptr;
+    QPushButton* trainingSaveConfigButton_ = nullptr;
+    QPushButton* trainingSaveAsConfigButton_ = nullptr;
+    QPushButton* trainingDbBrowseButton_ = nullptr;
+    QPushButton* trainingOutputBrowseButton_ = nullptr;
+    QPushButton* trainingClearLogButton_ = nullptr;
+    QProcess* trainingProcess_ = nullptr;
+    QString trainingLastResultPath_;
     QTableWidget* tblRuntimeChain_ = nullptr;
     QLabel* lbHealthLedger_ = nullptr;
     bool platformRunConfigApplyOk_ = true;
@@ -328,7 +359,6 @@ private:
     void initSensorMarkerWidget();//初始化传感器标记窗口
     void initFieldWidget();//初始化物理场
     void initFIeldControlPanel();//初始化物理场控制
-#ifdef FLIGHTENV_USE_PLATFORM_BACKEND
     void initPlatformFieldWidget();
     void initPlatformFieldControlPanel();
     void bindPlatformSnapshotCallback();
@@ -358,7 +388,6 @@ private:
     std::vector<int> platformLoopsForBranch(const QString& branchId) const;
     QString platformBestBranchId() const;
     int platformLatestLoopForBranch(const QString& branchId) const;
-#endif
     void initParameterTable();//初始化ROS信息参数表格
     void initScatterChart();//初始化图表
     void initFlightAttitudeWidget();//初始化飞行状态窗口
@@ -448,12 +477,10 @@ private:
 private slots:
     void onCheckBoxToggled();
     void comboBoxInfCurrentIndexChanged(int index);
-#ifdef FLIGHTENV_USE_PLATFORM_BACKEND
     void onPlatformBranchChanged(int index);
     void onPlatformFrameSliderChanged(int value);
     void onPlatformFollowLatestToggled(bool checked);
     void onPlatformFieldVisibilityChanged();
-#endif
 
 private:
     std::shared_ptr<const launchsupport::RuntimeViewModel> runtime_view_;
@@ -481,14 +508,10 @@ private slots:
     void on_trainBtn_clicked();//反演模型训练
     void on_pushButton_37_clicked();//反演模型保存
 private:
-    std::shared_ptr<StreamController> Node;
-    std::shared_ptr<launchsupport::LaunchSession<StreamController>> session_;
-    std::shared_ptr<launchsupport::ControllerViewAdapter> legacy_controller_;
     std::shared_ptr<launchsupport::IControllerBackend> controller_backend_;
     bool runtime_initialized_ = false;
     bool shutdown_prepared_ = false;
 
-#ifdef FLIGHTENV_USE_PLATFORM_BACKEND
     struct PlatformSensorLayoutView {
         QString resource_id;
         QString display_name;
@@ -546,7 +569,6 @@ private:
     std::set<QString> platformFieldValuePending_;
     std::vector<PlatformSensorLayoutView> platformSensorLayouts_;
     std::vector<PlatformSensorFrameView> platformSensorFrames_;
-#endif
 
 private:
      QScrollArea* chartScrollArea = nullptr;

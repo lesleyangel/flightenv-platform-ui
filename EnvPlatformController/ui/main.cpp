@@ -21,14 +21,8 @@
 #include <thread>
 #include <glog/logging.h>
 #include "direct.h"
-#include "../../include/EnvNodeTools/Utf8Console.h"
-#include "EnvNodeSupport/LaunchSessionFacade.h"
-#include "EnvNodeSupport/LaunchSessionHost.h"
 
 #include "EnvPredictorUI.h"
-
-#include <rclcpp/rclcpp.hpp>
-#include <rmw/rmw.h>
 
 
 #include <iomanip>
@@ -46,6 +40,14 @@ namespace {
 * @param stage 当前启动阶段的描述信息
 * 
 */
+void configure_utf8_console()
+{
+#if defined(_WIN32)
+    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleCP(CP_UTF8);
+#endif
+}
+
 void trace_startup(const char* stage)
 {
 #if defined(_MSC_VER)
@@ -99,28 +101,6 @@ void trace_startup(const char* stage)
     }
     catch (...) {
     }
-}
-
-void shutdown_ros_if_needed()
-{
-    if (rclcpp::ok()) {
-        rclcpp::shutdown();
-    }
-}
-
-void verify_ros_ready()
-{
-    if (!rclcpp::ok()) {
-        throw std::runtime_error("ROS2 context is not initialized. Check Visual Studio debugger environment.");
-    }
-
-    const char* rmw_id = rmw_get_implementation_identifier();
-    if (!rmw_id || !*rmw_id) {
-        throw std::runtime_error(
-            "RMW implementation is not available. Check RMW_IMPLEMENTATION, PATH, and ROS2 DLL package.");
-    }
-
-    RCLCPP_INFO(rclcpp::get_logger("main"), "RMW implementation: %s", rmw_id);
 }
 
 bool env_flag_enabled(const char* name)
@@ -188,12 +168,8 @@ int main(int argc, char* argv[])
     QApplication a(argc, argv);
     trace_startup("main: QApplication constructed");
     try {
-#ifdef FLIGHTENV_USE_PLATFORM_BACKEND
         trace_startup("main: platform controller mode");
-        auto window = std::make_unique<EnvPredictorUI>(
-            nullptr,
-            std::shared_ptr<StreamController>{},
-            std::shared_ptr<launchsupport::LaunchSession<StreamController>>{});
+        auto window = std::make_unique<EnvPredictorUI>();
         trace_startup("main: after EnvPredictorUI");
         window->show();
         trace_startup("main: window shown");
@@ -230,57 +206,6 @@ int main(int argc, char* argv[])
 
         trace_startup("main: exit success");
         return ret;
-#else
-        trace_startup("main: before rclcpp::init");
-        rclcpp::init(argc, argv);
-        trace_startup("main: after rclcpp::init");
-        verify_ros_ready();
-        trace_startup("main: ROS verified");
-
-        StreamControllerConfig sc_cfg;
-        trace_startup("main: before load_and_validate");
-        auto preflight = launchsupport::load_and_validate({ argc, argv, true });
-        trace_startup("main: after load_and_validate");
-        trace_startup("main: before StreamController");
-        auto stream_node = std::make_shared<StreamController>(sc_cfg);
-        trace_startup("main: after StreamController");
-        trace_startup("main: before LaunchSession");
-        auto session = std::make_shared<launchsupport::LaunchSession<StreamController>>(
-            std::move(preflight),
-            std::move(stream_node));
-        trace_startup("main: after LaunchSession");
-        auto node = session->node();
-
-        trace_startup("main: before LaunchSessionHost");
-        auto host = std::make_unique<launchsupport::LaunchSessionHost<StreamController>>(session);
-        trace_startup("main: after LaunchSessionHost");
-
-        trace_startup("main: before EnvPredictorUI");
-        auto window = std::make_unique<EnvPredictorUI>(nullptr, node, session);
-        trace_startup("main: after EnvPredictorUI");
-        window->show();
-        trace_startup("main: window shown");
-
-        int ret = a.exec();
-        trace_startup("main: QApplication exited");
-
-        if (window) {
-            window->prepareForShutdown();
-        }
-        if (host) {
-            host->shutdown();
-        }
-        window.reset();
-        host.reset();
-        node.reset();
-        session.reset();
-        stream_node.reset();
-        RCLCPP_INFO(rclcpp::get_logger("main"), "Application exited.");
-        shutdown_ros_if_needed();
-
-        trace_startup("main: exit success");
-        return ret;
-#endif
     }
     catch (const std::exception& e) {
         trace_startup(e.what());
@@ -288,7 +213,6 @@ int main(int argc, char* argv[])
             nullptr,
             QStringLiteral("FlightEnv UI startup failed"),
             QString::fromLocal8Bit(e.what()));
-        shutdown_ros_if_needed();
         return 1;
     }
 }
