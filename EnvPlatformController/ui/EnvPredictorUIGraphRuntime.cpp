@@ -306,7 +306,7 @@ void EnvPredictorUI::layoutGraphMultiFieldWidgets_()
         auto*& widget = graphMultiFieldWidgets_[QStringLiteral("__empty__")];
         if (!widget) {
             widget = new flightenv::ui::demo::VtkModelFieldWidget(graphMultiFieldContainer_);
-            widget->setMinimumHeight(280);
+            widget->setMinimumHeight(220);
         }
         widget->clearField(QStringLiteral("No renderable field output in current graph evidence."));
         widget->show();
@@ -337,7 +337,7 @@ void EnvPredictorUI::renderGraphPlatformFieldArtifacts_()
         auto*& widget = graphMultiFieldWidgets_[key];
         if (widget == nullptr) {
             widget = new flightenv::ui::demo::VtkModelFieldWidget(graphMultiFieldContainer_);
-            widget->setMinimumHeight(280);
+            widget->setMinimumHeight(220);
             widget->setAssetRoot(assetRoot);
             widget->setRuntimeSnapshot(runtime_view_->snapshot);
         }

@@ -131,15 +131,12 @@ OverviewPage::OverviewPage(
     familyStrip->setMinimumHeight(82);
     const int transitionCount = familyCount(objectPackage, QStringLiteral("state_transition"));
     const int observationCount = familyCount(objectPackage, QStringLiteral("observation_equation"));
-    const int filterCount = familyCount(objectPackage, QStringLiteral("filter_algorithm"));
     const int qoiCount = familyCount(objectPackage, QStringLiteral("qoi"));
     std::vector<StageStrip::Stage> familyStages = {
         {QStringLiteral("state_transition"), QStringLiteral("状态转移方程"),
          QStringLiteral("%1 个算子").arg(transitionCount), QString(), QStringLiteral("状态/场/累计量"), statusForCount(transitionCount)},
         {QStringLiteral("observation_equation"), QStringLiteral("观测方程"),
          QStringLiteral("%1 个算子").arg(observationCount), QString(), QStringLiteral("传感器投影"), statusForCount(observationCount)},
-        {QStringLiteral("filter_algorithm"), QStringLiteral("滤波算法"),
-         QStringLiteral("%1 个算子").arg(filterCount), QString(), QStringLiteral("后验估计"), statusForCount(filterCount)},
         {QStringLiteral("qoi"), QStringLiteral("QoI 方程"),
          QStringLiteral("%1 个算子").arg(qoiCount), QString(), QStringLiteral("判据/剩余寿命/极值"), statusForCount(qoiCount)},
     };

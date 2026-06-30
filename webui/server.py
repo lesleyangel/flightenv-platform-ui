@@ -1785,7 +1785,6 @@ def first_nonempty(*values):
 ALLOWED_OPERATOR_FAMILIES = {
     "state_transition",
     "observation_equation",
-    "filter_algorithm",
     "qoi",
     "data_source",
     "materialization",

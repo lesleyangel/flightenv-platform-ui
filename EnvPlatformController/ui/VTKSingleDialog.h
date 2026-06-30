@@ -274,6 +274,7 @@ private:
 
     // 主模型私有辅助函数
     void renderVTK(const std::vector<double>& pointValues);        // 渲染主模型
+    void updateScalarBarLayout();                                  // 统一云图标尺尺寸与字体
 
 protected:
     bool eventFilter(QObject* watched, QEvent* event) override;

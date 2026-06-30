@@ -30,6 +30,14 @@ function Read-Json {
     return $text | ConvertFrom-Json
 }
 
+function Read-OptionalJson {
+    param([string]$Path)
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+        return $null
+    }
+    return Read-Json $Path
+}
+
 function Read-Text {
     param([string]$Path)
     Assert-True (Test-Path -LiteralPath $Path -PathType Leaf) "missing file: $Path"
@@ -106,24 +114,25 @@ else {
     $onlineRunDir = [string]$summary.online.run_dir
     Assert-True (Test-Path -LiteralPath $onlineRunDir -PathType Container) "online run dir missing: $onlineRunDir"
 
-    $sensorStream = Read-Json (Join-Path $onlineRunDir "sensor_stream.json")
-    $nodeSnapshot = Read-Json (Join-Path $onlineRunDir "runtime_node_snapshot.json")
+    $estimationEvidence = Read-Json (Join-Path $onlineRunDir "estimation_evidence.json")
+    $sensorStream = Read-OptionalJson (Join-Path $onlineRunDir "sensor_stream.json")
     $schedulerTimeline = Read-Json (Join-Path $onlineRunDir "scheduler_timeline.json")
     $runtimeLoop = Read-Json (Join-Path $onlineRunDir "runtime_loop_summary.json")
 
-    $frames = @($sensorStream.frames)
-    Assert-True ($frames.Count -gt 0) "sensor_stream has no online frames"
-    Assert-True ($frames.Count -eq [int]$summary.online.sensor_frame_count) "sensor_stream frame count mismatch"
-    Assert-True ([int]$sensorStream.summary.sensor_count_min -gt 0) "sensor_count_min missing"
-    Assert-True ([int]$sensorStream.summary.sensor_count_min -eq [int]$sensorStream.summary.sensor_count_max) "sensor_count should be stable in current replay"
+    $frames = @($estimationEvidence.frames)
+    if ($frames.Count -eq 0 -and $null -ne $sensorStream.frames) {
+        $frames = @($sensorStream.frames)
+    }
+    Assert-True ($frames.Count -gt 0) "online estimation has no frames"
+    if ($null -ne $summary.online.sensor_frame_count) {
+        Assert-True ($frames.Count -eq [int]$summary.online.sensor_frame_count) "online frame count mismatch"
+    }
 
-    $pfNodes = @($nodeSnapshot.nodes | Where-Object { $_.operator_id -eq "reentry.particle_filter.atomic.v1" })
-    Assert-True ($pfNodes.Count -eq $frames.Count) "PF node count must match online frames"
-    foreach ($node in $pfNodes) {
-        $posterior = $node.runtime_packet.payload.outputs.'state.posterior'
-        Assert-True ($null -ne $posterior) "PF posterior output missing"
-        Assert-True ($null -ne $posterior.uncertainty.effective_sample_size) "PF ESS missing"
-        Assert-True ($null -ne $posterior.uncertainty.max_abs_residual) "PF residual summary missing"
+    Assert-True ($null -ne $estimationEvidence.summary.latest_checkpoint) "latest posterior checkpoint missing"
+    Assert-True ([int]$estimationEvidence.summary.frame_count -eq $frames.Count) "estimation evidence frame count mismatch"
+    foreach ($frame in $frames) {
+        Assert-True ($null -ne $frame.posterior_checkpoint) "posterior checkpoint missing"
+        Assert-True ($null -ne $frame.diagnostics) "estimation diagnostics missing"
     }
 
     $events = @($schedulerTimeline.events)

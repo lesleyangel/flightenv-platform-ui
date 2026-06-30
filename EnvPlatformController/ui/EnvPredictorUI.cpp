@@ -31,6 +31,8 @@
 #include <QSpinBox>
 #include <QDoubleSpinBox>
 #include <QFileDialog>
+#include <QFrame>
+#include <QGuiApplication>
 #include <QSlider>
 #include <QSignalBlocker>
 #include <QDialogButtonBox>
@@ -49,6 +51,7 @@
 #include <QDebug>
 #include <QVBoxLayout>
 #include <QSizePolicy>
+#include <QScreen>
 #include <QGroupBox>
 #include <QRandomGenerator>
 #include <QtCharts>
@@ -109,6 +112,21 @@ void platformUiLogImpl(google::LogSeverity severity, const char* format, va_list
     google::LogMessage(__FILE__, __LINE__, severity).stream() << message;
 }
 
+QRect defaultControllerWindowGeometry()
+{
+    const QSize preferredSize(1600, 900);
+    const QSize minimumComfortSize(1280, 720);
+    const QScreen* screen = QGuiApplication::primaryScreen();
+    const QRect available = screen ? screen->availableGeometry() : QRect(0, 0, 1920, 1080);
+    const int margin = 40;
+    const int width = std::clamp(preferredSize.width(), minimumComfortSize.width(), std::max(minimumComfortSize.width(), available.width() - margin));
+    const int height = std::clamp(preferredSize.height(), minimumComfortSize.height(), std::max(minimumComfortSize.height(), available.height() - margin));
+    const QPoint topLeft(
+        available.x() + std::max(0, (available.width() - width) / 2),
+        available.y() + std::max(0, (available.height() - height) / 2));
+    return QRect(topLeft, QSize(width, height));
+}
+
 } // namespace
 
 void platformUiLogInfo(const char* format, ...)
@@ -136,6 +154,8 @@ void platformUiLogError(const char* format, ...)
 }
 
 QString workspacePath(const QString& relativePath);
+QString findWorkspaceRoot();
+QString objectPackagePath(const QString& relativePath);
 QJsonObject readJsonObject(const QString& path);
 QString displayMetricLabel(const QString& label);
 QString displayMetricUnit(const QString& label, const QString& unit);
@@ -252,13 +272,89 @@ QString platformFieldIdentityKey(const launchsupport::PlatformFieldArtifactView&
         .arg(fieldName, portId, componentId, layoutRef, nodeId, contractId);
 }
 
+QString platformFieldDisplayName(const QString& rawName)
+{
+    const QString key = rawName.trimmed().toLower();
+    if (key.isEmpty()) {
+        return QString();
+    }
+    if (key == QStringLiteral("pressure") ||
+        key.contains(QStringLiteral("field.pressure")) ||
+        key.contains(QStringLiteral("aero_pressure"))) {
+        return QStringLiteral("气动压力场");
+    }
+    if (key == QStringLiteral("heatflux") ||
+        key == QStringLiteral("heat_flux") ||
+        key.contains(QStringLiteral("field.heatflux")) ||
+        key.contains(QStringLiteral("aero_heatflux"))) {
+        return QStringLiteral("气动热流场");
+    }
+    if (key == QStringLiteral("strain") ||
+        key.contains(QStringLiteral("field.strain")) ||
+        key.contains(QStringLiteral("structure_strain"))) {
+        return QStringLiteral("结构应变场");
+    }
+    if (key == QStringLiteral("temperature") ||
+        key.contains(QStringLiteral("field.temperature")) ||
+        key.contains(QStringLiteral("structure_temperature"))) {
+        return QStringLiteral("结构温度场");
+    }
+    if (key == QStringLiteral("damage") ||
+        key.contains(QStringLiteral("field.damage")) ||
+        key.contains(QStringLiteral("structure_damage"))) {
+        return QStringLiteral("结构损伤场");
+    }
+    if (key == QStringLiteral("ablation") ||
+        key.contains(QStringLiteral("field.ablation")) ||
+        key.contains(QStringLiteral("tps_ablation"))) {
+        return QStringLiteral("防热烧蚀场");
+    }
+    if (key == QStringLiteral("rul") ||
+        key == QStringLiteral("life") ||
+        key == QStringLiteral("remaining_life") ||
+        key.contains(QStringLiteral("field.rul")) ||
+        key.contains(QStringLiteral("remaining_life"))) {
+        return QStringLiteral("剩余寿命场");
+    }
+    return rawName;
+}
+
+QString platformComponentDisplayName(const QString& rawName)
+{
+    const QString key = rawName.trimmed().toLower();
+    if (key == QStringLiteral("shell")) {
+        return QStringLiteral("外壳");
+    }
+    if (key == QStringLiteral("structure")) {
+        return QStringLiteral("结构");
+    }
+    if (key == QStringLiteral("tps")) {
+        return QStringLiteral("防热层");
+    }
+    return rawName;
+}
+
+QString platformFieldDisplayLabelFromKey(const QString& identityKey)
+{
+    const QStringList parts = identityKey.split(QLatin1Char('|'));
+    const QString fieldName = parts.size() > 0 ? platformFieldDisplayName(parts.at(0)) : identityKey;
+    const QString portId = parts.size() > 1 ? platformFieldDisplayName(parts.at(1)) : QString();
+    const QString component = parts.size() > 2 ? platformComponentDisplayName(parts.at(2)) : QString();
+    QString label = fieldName.isEmpty() ? portId : fieldName;
+    if (!component.isEmpty()) {
+        label += QStringLiteral(" / ") + component;
+    }
+    return label.isEmpty() ? identityKey : label;
+}
+
 QString platformFieldTitle(const launchsupport::PlatformFieldArtifactView& field)
 {
     QString name = QString::fromStdString(field.field_name);
     if (name.isEmpty()) {
         name = QString::fromStdString(field.port_id);
     }
-    QString component = QString::fromStdString(field.component_id);
+    name = platformFieldDisplayName(name);
+    QString component = platformComponentDisplayName(QString::fromStdString(field.component_id));
     QString unit = QString::fromStdString(field.unit);
     QString title = component.isEmpty() ? name : QStringLiteral("%1 / %2").arg(name, component);
     if (!unit.isEmpty()) {
@@ -561,7 +657,16 @@ std::filesystem::path platformConfigPathValue(
     if (value.is_relative()) {
         value = objectRoot / value;
     }
-    return value.lexically_normal();
+    value = value.lexically_normal();
+    if (!std::filesystem::exists(value)) {
+        platformUiLogWarning(
+            "Platform UI run config path does not exist, using fallback. key=%s configured=%s fallback=%s",
+            key.toStdString().c_str(),
+            value.string().c_str(),
+            fallback.string().c_str());
+        return fallback.lexically_normal();
+    }
+    return value;
 }
 
 PlatformUiRunConfig loadPlatformUiRunConfig(
@@ -569,7 +674,7 @@ PlatformUiRunConfig loadPlatformUiRunConfig(
     const std::filesystem::path& objectRoot)
 {
     PlatformUiRunConfig config;
-    config.external_observation_stream = objectRoot / "fixtures" / "sensor_stream_db70.json";
+    config.external_observation_stream = objectRoot / "fixtures" / "sensor_stream_db70_real_db.json";
 
     const QJsonObject saved = readPlatformUiRunConfigJson(workspaceRoot);
     config.online_frames = configInt(saved, QStringLiteral("online_frames"), config.online_frames);
@@ -690,7 +795,7 @@ std::filesystem::path preparePlatformUiCompiledWorkflows(
     const QString profilePath = QString::fromStdString(
         platformUiRunProfilePath(workspaceRoot, runId).string());
 
-    auto compileWorkflow = [&](const QString& workflowId) {
+    auto compileWorkflow = [&](const QString& workflowId, const bool useRunProfile) {
         QStringList args;
         args << QStringLiteral("-NoProfile")
              << QStringLiteral("-ExecutionPolicy") << QStringLiteral("Bypass")
@@ -698,13 +803,18 @@ std::filesystem::path preparePlatformUiCompiledWorkflows(
              << QStringLiteral("-ObjectPackage") << QString::fromStdString(objectRoot.string())
              << QStringLiteral("-Workflow") << workflowId
              << QStringLiteral("-OutDir") << QString::fromStdString(outDir.string())
-             << QStringLiteral("-RunId") << QString::fromStdString(runId)
-             << QStringLiteral("-RunProfile") << profilePath;
+             << QStringLiteral("-RunId") << QString::fromStdString(runId);
+        // The UI run profile is an online-run selection profile.  Applying it to
+        // the posterior future workflow can accidentally filter the prediction
+        // phase, so only the online workflow receives it.
+        if (useRunProfile) {
+            args << QStringLiteral("-RunProfile") << profilePath;
+        }
         runProcessChecked(QStringLiteral("powershell"), args, workspaceRoot, QStringLiteral("compile ") + workflowId);
     };
 
-    compileWorkflow(QStringLiteral("reentry.online_filtering_external_input.v1"));
-    compileWorkflow(QStringLiteral("reentry.posterior_future_prediction.v1"));
+    compileWorkflow(QStringLiteral("reentry.online_filtering_external_input.v1"), true);
+    compileWorkflow(QStringLiteral("reentry.posterior_future_prediction.v1"), false);
     return outDir;
 }
 
@@ -879,15 +989,15 @@ EnvPredictorUI::EnvPredictorUI(QWidget* parent)
     ui.tabWidget_main->setCurrentIndex(0);
     connect(ui.pushButton_minimize, &QPushButton::clicked, this, &EnvPredictorUI::showMinimized);
     connect(ui.pushButton_maximize, &QPushButton::clicked, this, [this]() {
-        if (isMaximized()) {
+        if (isFullScreen()) {
             showNormal();
             ui.pushButton_maximize->setIcon(QIcon(":/ui/img/arrows-out.svg"));
-            ui.pushButton_maximize->setToolTip(QString::fromUtf8("最大化"));
+            ui.pushButton_maximize->setToolTip(QStringLiteral("全屏"));
         }
         else {
-            showMaximized();
+            showFullScreen();
             ui.pushButton_maximize->setIcon(QIcon(":/ui/img/arrows-in.svg"));
-            ui.pushButton_maximize->setToolTip(QString::fromUtf8("还原"));
+            ui.pushButton_maximize->setToolTip(QStringLiteral("退出全屏"));
         }
     });
     connect(ui.pushButton_39, &QPushButton::clicked, this, &EnvPredictorUI::close);
@@ -916,8 +1026,40 @@ void EnvPredictorUI::initWindow()
     trainingBoxLayout->setContentsMargins(8, 8, 8, 8);
     trainingBoxLayout->setSpacing(6);
     buildTrainingCliControls_(trainingBoxLayout, trainingBox);
-    ui.gridLayout_84->addWidget(trainingBox, 1, 0);
+
+    auto* modelScroll = new QScrollArea(ui.tab);
+    modelScroll->setObjectName(QStringLiteral("modelTrainingLegacyScroll"));
+    modelScroll->setWidgetResizable(true);
+    modelScroll->setFrameShape(QFrame::NoFrame);
+    modelScroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    modelScroll->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    modelScroll->setMinimumHeight(280);
+
+    auto* trainingScroll = new QScrollArea(ui.tab);
+    trainingScroll->setObjectName(QStringLiteral("trainingConfigLogScroll"));
+    trainingScroll->setWidgetResizable(true);
+    trainingScroll->setFrameShape(QFrame::NoFrame);
+    trainingScroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    trainingScroll->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    trainingScroll->setMinimumHeight(170);
+
+    ui.gridLayout_84->removeWidget(ui.splitter_5);
+    modelScroll->setWidget(ui.splitter_5);
+    trainingScroll->setWidget(trainingBox);
+
+    auto* trainingPageSplitter = new QSplitter(Qt::Vertical, ui.tab);
+    trainingPageSplitter->setObjectName(QStringLiteral("trainingPageSplitter"));
+    trainingPageSplitter->addWidget(modelScroll);
+    trainingPageSplitter->addWidget(trainingScroll);
+    trainingPageSplitter->setStretchFactor(0, 3);
+    trainingPageSplitter->setStretchFactor(1, 1);
+    trainingPageSplitter->setCollapsible(0, false);
+    trainingPageSplitter->setCollapsible(1, false);
+    trainingPageSplitter->setSizes(QList<int>() << 560 << 230);
+    ui.gridLayout_84->addWidget(trainingPageSplitter, 0, 0);
+
     hideLegacyInlineTrainingButtons_();
+    polishLegacyTrainingForms_();
 }
 
 /**
@@ -990,7 +1132,7 @@ void EnvPredictorUI::initTree()
 void EnvPredictorUI::initIcons()
 {
     ui.pushButton_minimize->setToolTip(QString::fromUtf8("最小化"));
-    ui.pushButton_maximize->setToolTip(QString::fromUtf8("还原"));
+    ui.pushButton_maximize->setToolTip(QStringLiteral("退出全屏"));
     ui.pushButton_39->setToolTip(QString::fromUtf8("关闭"));
     ui.pushButton_minimize->setIcon(QIcon(":/ui/img/arrows-in-line-horizontal.svg"));
     ui.pushButton_maximize->setIcon(QIcon(":/ui/img/arrows-in.svg"));
@@ -1000,7 +1142,10 @@ void EnvPredictorUI::initIcons()
     this->setWindowIcon(QIcon(":/ui/img/codepen-logo.svg"));
 
     this->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
-    this->showMaximized();
+    this->setGeometry(defaultControllerWindowGeometry());
+    this->showFullScreen();
+    ui.pushButton_maximize->setIcon(QIcon(":/ui/img/arrows-in.svg"));
+    ui.pushButton_maximize->setToolTip(QStringLiteral("退出全屏"));
 
     QIcon tabIcon1;
     QPixmap tabPixmap1(":/ui/img/1.png");
@@ -1103,7 +1248,9 @@ bool EnvPredictorUI::initializeRuntime()
 void EnvPredictorUI::bindControllerCallbacks()
 {
     launchsupport::ControllerViewCallbacks callbacks;
-    callbacks.onLog = [](const std::string& s) { std::cout << s << std::endl; };
+    callbacks.onLog = [](const std::string& s) {
+        platformUiLogInfo("%s", s.c_str());
+    };
     callbacks.onSensor = [this](const launchsupport::SensorViewModel& d) {
         QPointer<EnvPredictorUI> self(this);
         QMetaObject::invokeMethod(this, [self, d]() {
@@ -2163,11 +2310,14 @@ void EnvPredictorUI::initPlatformFieldWidget()
     }
 
     platformFieldGridLayout_ = new QGridLayout(vtkContainer);
-    platformFieldGridLayout_->setSpacing(10);
+    platformFieldGridLayout_->setSpacing(6);
     platformFieldGridLayout_->setContentsMargins(0, 0, 0, 0);
     vtkContainer->setLayout(platformFieldGridLayout_);
     ui.windowNumspinBox->setEnabled(true);
     ui.numHorWindowSpin->setEnabled(true);
+    if (ui.windowNumspinBox->value() < 2) {
+        ui.windowNumspinBox->setValue(2);
+    }
     connect(ui.windowNumspinBox, qOverload<int>(&QSpinBox::valueChanged), this, [this](int) {
         layoutPlatformFieldWidgets();
     }, Qt::UniqueConnection);
@@ -2603,9 +2753,103 @@ QString jsonNumberText(const QJsonObject& object, const QString& key, const QStr
     return value.isDouble() ? QString::number(value.toDouble(), 'g', 10) : fallback;
 }
 
+QString pathWithForwardSlashes(QString text)
+{
+    text = QDir::fromNativeSeparators(text.trimmed());
+    while (text.contains(QStringLiteral("//"))) {
+        text.replace(QStringLiteral("//"), QStringLiteral("/"));
+    }
+    return text;
+}
+
+QString pathTailFromMarker(const QString& normalizedPath, const QString& marker)
+{
+    const QString needle = QStringLiteral("/") + marker + QStringLiteral("/");
+    int index = normalizedPath.indexOf(needle, 0, Qt::CaseInsensitive);
+    if (index >= 0) {
+        return normalizedPath.mid(index + 1);
+    }
+    if (normalizedPath.startsWith(marker + QStringLiteral("/"), Qt::CaseInsensitive)) {
+        return normalizedPath;
+    }
+    return {};
+}
+
+QString workspaceResolvedPath(const QString& pathOrUri)
+{
+    QString text = pathWithForwardSlashes(pathOrUri);
+    if (text.isEmpty() || text == QStringLiteral("-")) {
+        return {};
+    }
+    if (text.startsWith(QStringLiteral("object://"))) {
+        return objectPackagePath(text.mid(QStringLiteral("object://").size()));
+    }
+
+    const QString workspaceRoot = QDir::fromNativeSeparators(findWorkspaceRoot());
+    const QFileInfo info(text);
+    if (info.isAbsolute() && info.exists()) {
+        return QDir::toNativeSeparators(info.absoluteFilePath());
+    }
+
+    for (const QString& marker : {
+        QStringLiteral("_deps"),
+        QStringLiteral("_local_artifacts"),
+        QStringLiteral("flightenv-object-reentry-vehicle"),
+        QStringLiteral("flightenv-platform-pdk")
+    }) {
+        const QString tail = pathTailFromMarker(text, marker);
+        if (!tail.isEmpty()) {
+            return QDir::toNativeSeparators(QDir(workspaceRoot).filePath(tail));
+        }
+    }
+
+    if (info.isAbsolute()) {
+        return QDir::toNativeSeparators(text);
+    }
+    return QDir::toNativeSeparators(QDir(workspaceRoot).filePath(text));
+}
+
+QString workspaceDisplayPath(const QString& pathOrUri)
+{
+    QString text = pathWithForwardSlashes(pathOrUri);
+    if (text.isEmpty() || text == QStringLiteral("-")) {
+        return QStringLiteral("-");
+    }
+    if (text.startsWith(QStringLiteral("object://"))) {
+        return QDir::toNativeSeparators(QStringLiteral("flightenv-object-reentry-vehicle/") +
+            text.mid(QStringLiteral("object://").size()));
+    }
+
+    for (const QString& marker : {
+        QStringLiteral("_deps"),
+        QStringLiteral("_local_artifacts"),
+        QStringLiteral("flightenv-object-reentry-vehicle"),
+        QStringLiteral("flightenv-platform-pdk")
+    }) {
+        const QString tail = pathTailFromMarker(text, marker);
+        if (!tail.isEmpty()) {
+            return QDir::toNativeSeparators(tail);
+        }
+    }
+
+    const QFileInfo info(text);
+    if (info.isAbsolute()) {
+        const QDir root(findWorkspaceRoot());
+        const QString relative = root.relativeFilePath(info.absoluteFilePath());
+        if (!relative.startsWith(QStringLiteral(".."))) {
+            return QDir::toNativeSeparators(relative);
+        }
+    }
+    return QDir::toNativeSeparators(text);
+}
+
 QString objectPackagePath(const QString& relativePath)
 {
-    return workspacePath(QStringLiteral("flightenv-object-reentry-vehicle/") + relativePath);
+    const auto configuredObjectRoot = environmentPath("FLIGHTENV_PLATFORM_OBJECT_ROOT");
+    const QString objectRoot = configuredObjectRoot.empty()
+        ? workspacePath(QStringLiteral("flightenv-object-reentry-vehicle"))
+        : QDir::toNativeSeparators(QString::fromStdString(configuredObjectRoot.lexically_normal().string()));
+    return QDir::toNativeSeparators(QDir(objectRoot).filePath(relativePath));
 }
 
 QString objectResourcePath(const QString& pathOrUri)
@@ -2617,13 +2861,25 @@ QString objectResourcePath(const QString& pathOrUri)
         return objectPackagePath(pathOrUri.mid(QStringLiteral("object://").size()));
     }
     if (QDir::isAbsolutePath(pathOrUri)) {
-        return QDir::toNativeSeparators(pathOrUri);
+        return workspaceResolvedPath(pathOrUri);
     }
     if (pathOrUri.startsWith(QStringLiteral("_deps/")) ||
         pathOrUri.startsWith(QStringLiteral("_local_artifacts/"))) {
-        return workspacePath(pathOrUri);
+        return workspaceResolvedPath(pathOrUri);
     }
     return objectPackagePath(pathOrUri);
+}
+
+QString objectResourceDisplayPath(const QString& pathOrUri)
+{
+    if (pathOrUri.isEmpty()) {
+        return QStringLiteral("-");
+    }
+    if (pathOrUri.startsWith(QStringLiteral("object://"))) {
+        return QDir::toNativeSeparators(QStringLiteral("object/") +
+            pathOrUri.mid(QStringLiteral("object://").size()));
+    }
+    return workspaceDisplayPath(pathOrUri);
 }
 
 QString canonicalMetricLabel(const QString& label)
@@ -2725,7 +2981,7 @@ QString workflowStageLabel(const QString& stageId)
 {
     if (stageId == QStringLiteral("state_transition")) return QStringLiteral("状态转移");
     if (stageId == QStringLiteral("observation_equation")) return QStringLiteral("观测方程");
-    if (stageId == QStringLiteral("filter_algorithm")) return QStringLiteral("滤波融合");
+    if (stageId == QStringLiteral("estimation_system")) return QStringLiteral("系统级滤波融合");
     if (stageId == QStringLiteral("posterior_field_reconstruction")) return QStringLiteral("多场重构/累积");
     if (stageId == QStringLiteral("failure_qoi")) return QStringLiteral("风险与寿命评估");
     return stageId;
@@ -2760,14 +3016,31 @@ void setTableText(QTableWidget* table, int row, int col, const QString& text)
 {
     auto* item = new QTableWidgetItem(text);
     item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+    item->setToolTip(text);
     table->setItem(row, col, item);
 }
 
 QString findWorkspaceRoot()
 {
+    for (const char* name : {"FLIGHTENV_WORKSPACE_HOME", "FLIGHTENV_WORKSPACE_ROOT"}) {
+        const auto configured = environmentPath(name);
+        if (!configured.empty()) {
+            return QDir::toNativeSeparators(QString::fromStdString(configured.lexically_normal().string()));
+        }
+    }
+    const auto objectRoot = environmentPath("FLIGHTENV_PLATFORM_OBJECT_ROOT");
+    if (!objectRoot.empty() && objectRoot.has_parent_path()) {
+        return QDir::toNativeSeparators(QString::fromStdString(objectRoot.parent_path().lexically_normal().string()));
+    }
+    const auto depsWorkspace = environmentPath("FLIGHTENV_DEPS_WORKSPACE_ROOT");
+    if (!depsWorkspace.empty()) {
+        return QDir::toNativeSeparators(QString::fromStdString(depsWorkspace.parent_path().parent_path().lexically_normal().string()));
+    }
+
     QDir dir(QDir::currentPath());
     for (int i = 0; i < 8; ++i) {
-        if (QFile::exists(dir.filePath(QStringLiteral("FlightEnvMultiRepo.sln")))) {
+        if (QFile::exists(dir.filePath(QStringLiteral("FlightEnvMultiRepo.sln"))) ||
+            QFile::exists(dir.filePath(QStringLiteral("flightenv-object-reentry-vehicle/object/twin_object.json")))) {
             return QDir::toNativeSeparators(dir.absolutePath());
         }
         if (!dir.cdUp()) {
@@ -2886,6 +3159,7 @@ QTableWidget* makeGraphTable(QWidget* parent, const QStringList& headers)
     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
     table->setAlternatingRowColors(true);
+    table->setTextElideMode(Qt::ElideMiddle);
     table->setWordWrap(false);
     return table;
 }
@@ -3199,8 +3473,8 @@ QString equationRelationText(const QString& graphName, const launchsupport::Grap
         if (type == QStringLiteral("observation_equation")) {
             return QString::fromUtf8("观测方程：把传感器/数据库观测映射到 observation.predicted。");
         }
-        if (type == QStringLiteral("filter_algorithm")) {
-            return QString::fromUtf8("滤波算法：同时消费状态转移先验和观测方程输出，更新 state.posterior；不是简单顺序串行替代关系。");
+        if (type == QStringLiteral("estimation_system")) {
+            return QString::fromUtf8("系统级估计：由平台托管多样本调度、观测对齐和后验发布，不再作为普通滤波算子节点。");
         }
     }
     if (type == QStringLiteral("state_transition")) {
@@ -3253,10 +3527,10 @@ void appendConceptualOnlineEquationRows(QTableWidget* table)
     });
     appendGraphRow(table, {
         QString::fromUtf8("在线滤波子图"),
-        QString::fromUtf8("filter_algorithm"),
+        QString::fromUtf8("estimation_system"),
         QStringLiteral("state.predicted + observation.predicted + sensor.observation"),
         QStringLiteral("state.posterior"),
-        QString::fromUtf8("滤波算法同时使用状态转移和观测方程。")
+        QString::fromUtf8("平台估计系统统一完成样本调度、融合更新、checkpoint 和 evidence。")
     });
 }
 

@@ -24,8 +24,8 @@ QString familyText(const QString& family) {
     if (family == QStringLiteral("observation_equation")) {
         return QStringLiteral("观测方程");
     }
-    if (family == QStringLiteral("filter_algorithm")) {
-        return QStringLiteral("滤波算法");
+    if (family == QStringLiteral("estimation_system")) {
+        return QStringLiteral("系统级估计");
     }
     if (family == QStringLiteral("qoi")) {
         return QStringLiteral("QoI 指标/判据");

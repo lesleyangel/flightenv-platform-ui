@@ -10,33 +10,32 @@ void EnvPredictorUI::buildRuntimeChainPage_()
 
     pageRuntimeChain_ = new QWidget(ui.tabWidget_main);
     auto* root = new QVBoxLayout(pageRuntimeChain_);
-    root->setContentsMargins(8, 8, 8, 8);
-    root->setSpacing(8);
+    root->setContentsMargins(4, 4, 4, 4);
+    root->setSpacing(4);
 
     auto* summaryRow = new QWidget(pageRuntimeChain_);
+    summaryRow->setMaximumHeight(86);
     auto* summaryLayout = new QHBoxLayout(summaryRow);
     summaryLayout->setContentsMargins(0, 0, 0, 0);
-    summaryLayout->setSpacing(8);
+    summaryLayout->setSpacing(4);
 
     lbObjectSummary_ = new QLabel(summaryRow);
     lbObjectSummary_->setWordWrap(true);
     lbObjectSummary_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     lbObjectSummary_->setStyleSheet(QStringLiteral(
-        "QLabel{padding:8px;background:#eef6f6;border:1px solid #9cc9c9;border-radius:4px;font-weight:600;}"));
+        "QLabel{padding:4px 8px;background:#eef6f6;border:1px solid #9cc9c9;border-radius:4px;font-weight:600;}"));
     summaryLayout->addWidget(lbObjectSummary_, 1);
 
     auto* objectActionBox = new QGroupBox(QStringLiteral("模型初始化"), summaryRow);
-    objectActionBox->setMaximumWidth(260);
+    objectActionBox->setMaximumWidth(190);
+    objectActionBox->setMaximumHeight(82);
     auto* objectActionLayout = new QVBoxLayout(objectActionBox);
-    objectActionLayout->setContentsMargins(8, 8, 8, 8);
-    objectActionLayout->setSpacing(6);
-    objectTrainButton_ = new QPushButton(QStringLiteral("训练 / 初始化模型"), objectActionBox);
+    objectActionLayout->setContentsMargins(6, 6, 6, 6);
+    objectActionLayout->setSpacing(3);
+    objectTrainButton_ = new QPushButton(QStringLiteral("初始化"), objectActionBox);
+    objectTrainButton_->setMaximumHeight(30);
     objectTrainButton_->setToolTip(QStringLiteral("执行对象模型初始化或训练准备；运行控制仍在模拟演示页的任务时间轴面板中完成"));
     objectActionLayout->addWidget(objectTrainButton_);
-    auto* objectTrainHint = new QLabel(QStringLiteral("对象模型相关操作放在对象信息页；在线开始、暂停、复位只保留在任务时间轴面板。"), objectActionBox);
-    objectTrainHint->setWordWrap(true);
-    objectTrainHint->setStyleSheet(QStringLiteral("QLabel{color:#64748b;font-size:11px;}"));
-    objectActionLayout->addWidget(objectTrainHint);
     summaryLayout->addWidget(objectActionBox);
     root->addWidget(summaryRow);
     connect(objectTrainButton_, &QPushButton::clicked, this, &EnvPredictorUI::on_trainBtn_clicked, Qt::UniqueConnection);
@@ -60,9 +59,16 @@ void EnvPredictorUI::buildRuntimeChainPage_()
     tblObjectBasic_ = makeGraphTable(topSplitter, {
         QStringLiteral("项目"), QStringLiteral("内容"), QStringLiteral("来源")
     });
+    tblObjectBasic_->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+    tblObjectBasic_->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
+    tblObjectBasic_->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
     tblObjectMeshes_ = makeGraphTable(topSplitter, {
         QStringLiteral("网格"), QStringLiteral("部件"), QStringLiteral("文件"), QStringLiteral("说明")
     });
+    tblObjectMeshes_->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+    tblObjectMeshes_->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+    tblObjectMeshes_->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
+    tblObjectMeshes_->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
     topSplitter->addWidget(tblObjectBasic_);
     topSplitter->addWidget(tblObjectMeshes_);
     topSplitter->setStretchFactor(0, 1);
@@ -110,6 +116,12 @@ void EnvPredictorUI::buildRuntimeChainPage_()
         QStringLiteral("传感器组"), QStringLiteral("部件/位置"), QStringLiteral("测点"),
         QStringLiteral("通道数"), QStringLiteral("单位"), QStringLiteral("数据前缀")
     });
+    tblObjectSensors_->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+    tblObjectSensors_->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+    tblObjectSensors_->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
+    tblObjectSensors_->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
+    tblObjectSensors_->horizontalHeader()->setSectionResizeMode(4, QHeaderView::ResizeToContents);
+    tblObjectSensors_->horizontalHeader()->setSectionResizeMode(5, QHeaderView::ResizeToContents);
     sensorLayout->addWidget(sensorLeftPanel, 2);
     sensorLayout->addWidget(tblObjectSensors_, 3);
     contentLayout->addWidget(sensorGroup);
@@ -138,6 +150,8 @@ void EnvPredictorUI::buildRuntimeChainPage_()
     objectReplayTimeScaleSpin_->setToolTip(QStringLiteral("平台时钟回放速度倍率，不改变输入数据自身时间步长"));
     objectSensorStreamEdit_ = new QLineEdit(runConfigGroup);
     objectSensorStreamEdit_->setToolTip(QStringLiteral("传感器外部回放流文件，点开始前应用到 runtime host"));
+    objectTrajectoryInputEdit_ = new QLineEdit(runConfigGroup);
+    objectTrajectoryInputEdit_->setToolTip(QStringLiteral("仅用于显示/选择弹道输入文件，本轮不写入运行参数"));
 
     auto addConfigRow = [&](const int row, const QString& label, QWidget* widget) {
         runConfigLayout->addWidget(new QLabel(label, runConfigGroup), row, 0);
@@ -158,12 +172,21 @@ void EnvPredictorUI::buildRuntimeChainPage_()
     auto* browseStreamButton = new QPushButton(QStringLiteral("选择"), streamRow);
     streamLayout->addWidget(browseStreamButton);
     runConfigLayout->addWidget(streamRow, 6, 1);
+    runConfigLayout->addWidget(new QLabel(QStringLiteral("弹道输入文件"), runConfigGroup), 7, 0);
+    auto* trajectoryRow = new QWidget(runConfigGroup);
+    auto* trajectoryLayout = new QHBoxLayout(trajectoryRow);
+    trajectoryLayout->setContentsMargins(0, 0, 0, 0);
+    trajectoryLayout->setSpacing(6);
+    trajectoryLayout->addWidget(objectTrajectoryInputEdit_, 1);
+    auto* browseTrajectoryButton = new QPushButton(QStringLiteral("选择"), trajectoryRow);
+    trajectoryLayout->addWidget(browseTrajectoryButton);
+    runConfigLayout->addWidget(trajectoryRow, 7, 1);
     auto* applyRunConfigButton = new QPushButton(QStringLiteral("应用到下一次开始"), runConfigGroup);
     objectRunConfigHint_ = new QLabel(QStringLiteral("修改后点“应用”或直接点“开始”生效；运行中修改需要重新开始。"), runConfigGroup);
     objectRunConfigHint_->setWordWrap(true);
     objectRunConfigHint_->setStyleSheet(QStringLiteral("QLabel{color:#475569;}"));
-    runConfigLayout->addWidget(objectRunConfigHint_, 7, 0, 1, 2);
-    runConfigLayout->addWidget(applyRunConfigButton, 8, 1, Qt::AlignRight);
+    runConfigLayout->addWidget(objectRunConfigHint_, 8, 0, 1, 2);
+    runConfigLayout->addWidget(applyRunConfigButton, 9, 1, Qt::AlignRight);
     runConfigLayout->setColumnStretch(1, 1);
     contentLayout->addWidget(runConfigGroup);
 
@@ -178,6 +201,19 @@ void EnvPredictorUI::buildRuntimeChainPage_()
             QStringLiteral("JSON 文件 (*.json);;所有文件 (*.*)"));
         if (!selected.isEmpty() && objectSensorStreamEdit_) {
             objectSensorStreamEdit_->setText(QDir::toNativeSeparators(selected));
+        }
+    });
+    connect(browseTrajectoryButton, &QPushButton::clicked, this, [this]() {
+        const QString startPath = objectTrajectoryInputEdit_ && !objectTrajectoryInputEdit_->text().isEmpty()
+            ? QFileInfo(objectTrajectoryInputEdit_->text()).absolutePath()
+            : objectPackagePath(QStringLiteral("fixtures"));
+        const QString selected = QFileDialog::getOpenFileName(
+            this,
+            QStringLiteral("选择弹道输入文件"),
+            startPath,
+            QStringLiteral("弹道/JSON/文本文件 (*.json *.txt *.csv);;所有文件 (*.*)"));
+        if (!selected.isEmpty() && objectTrajectoryInputEdit_) {
+            objectTrajectoryInputEdit_->setText(QDir::toNativeSeparators(selected));
         }
     });
     connect(applyRunConfigButton, &QPushButton::clicked, this, &EnvPredictorUI::applyPlatformRunConfigFromUi_);
@@ -201,11 +237,6 @@ void EnvPredictorUI::buildRuntimeChainPage_()
     bottomSplitter->setStretchFactor(0, 3);
     bottomSplitter->setStretchFactor(1, 2);
     contentLayout->addWidget(bottomSplitter);
-
-    lbHealthLedger_ = new QLabel(pageRuntimeChain_);
-    lbHealthLedger_->setWordWrap(true);
-    lbHealthLedger_->setStyleSheet(QStringLiteral("QLabel{color:#475569;padding:4px;}"));
-    root->addWidget(lbHealthLedger_);
 
     auto* refreshButton = new QPushButton(QString::fromUtf8("刷新"), pageRuntimeChain_);
     connect(refreshButton, &QPushButton::clicked, this, &EnvPredictorUI::refreshRuntimeChainPage_);
@@ -324,7 +355,7 @@ void EnvPredictorUI::refreshRuntimeChainPage_()
         appendGraphRow(tblObjectMeshes_, {
             resource.value(QStringLiteral("display_name")).toString(resource.value(QStringLiteral("resource_id")).toString()),
             resource.value(QStringLiteral("component_id")).toString(QStringLiteral("-")),
-            objectResourcePath(resource.value(QStringLiteral("path")).toString()),
+            objectResourceDisplayPath(resource.value(QStringLiteral("path")).toString()),
             resource.value(QStringLiteral("layout_role")).toString(resource.value(QStringLiteral("resource_id")).toString())
         });
     }
@@ -398,6 +429,9 @@ void EnvPredictorUI::refreshRuntimeChainPage_()
         objectReplayTimeScaleSpin_->setValue(uiRunConfig.replay_time_scale);
         if (objectSensorStreamEdit_) {
             objectSensorStreamEdit_->setText(QDir::toNativeSeparators(sensorStreamPath));
+        }
+        if (objectTrajectoryInputEdit_ && objectTrajectoryInputEdit_->text().trimmed().isEmpty()) {
+            objectTrajectoryInputEdit_->setText(objectResourceDisplayPath(trajectoryDataset.value(QStringLiteral("uri")).toString()));
         }
     }
 
@@ -478,7 +512,7 @@ void EnvPredictorUI::refreshRuntimeChainPage_()
         connect(check, &QCheckBox::toggled, this, [this]() {
             platformRunConfigApplyOk_ = false;
             if (objectRunConfigHint_) {
-                objectRunConfigHint_->setText(QStringLiteral("算子选择已修改；点训练/开始前会自动应用，也可以先点应用运行设置。"));
+                objectRunConfigHint_->setText(QStringLiteral("算子选择已修改；点初始化/开始前会自动应用，也可以先点应用运行设置。"));
             }
         });
         setTableText(tblRuntimeChain_, row, 2, operatorDisplayName(operatorRef, nodeId));
@@ -570,14 +604,10 @@ void EnvPredictorUI::refreshRuntimeChainPage_()
 
     for (QTableWidget* table : {tblObjectBasic_, tblObjectMeshes_, tblObjectSensors_, tblRuntimeChain_, tblObjectRuntimeConfig_}) {
         if (table) {
-            table->resizeColumnsToContents();
+            table->resizeRowsToContents();
         }
     }
 
-    if (lbHealthLedger_) {
-        lbHealthLedger_->setText(QStringLiteral(
-            "说明：本页面向对象验收展示，隐藏 typed-buffer/runtime URI 等调试细节；取消勾选非必选算子后，下一次训练/开始会重新编译 workflow 并按选择运行；必选算子不可关闭。"));
-    }
 }
 
 void EnvPredictorUI::applyPlatformRunConfigFromUi_()
@@ -647,7 +677,7 @@ void EnvPredictorUI::applyPlatformRunConfigFromUi_()
 
     if (objectRunConfigHint_) {
         objectRunConfigHint_->setText(QStringLiteral(
-            "已应用到下一次训练/开始：在线%1帧，每%2帧开分支，未来%3步，并发%4，回放倍率%5，禁用算子%6个。")
+            "已应用到下一次初始化/开始：在线%1帧，每%2帧开分支，未来%3步，并发%4，回放倍率%5，禁用算子%6个。")
             .arg(objectOnlineFramesSpin_->value())
             .arg(objectPredictionEveryFramesSpin_->value())
             .arg(objectFutureMaxIterationsSpin_->value())

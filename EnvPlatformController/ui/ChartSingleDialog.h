@@ -19,11 +19,12 @@ public:
         Qt::GlobalColor color = Qt::darkMagenta);
 private:
     void initChart(const QString& title); // 初始化图表组件
+    void applyReadableAxisLayout();       // 保证坐标轴刻度和标题有足够显示空间
     
-    QChart* m_chart;               // 核心图表（单图表）
-    QChartView* m_chartView;       // 图表视图
-    QValueAxis* m_axisX;           // X轴（数据点索引）
-    QValueAxis* m_axisY;           // Y轴（数据值）
+    QChart* m_chart = nullptr;               // 核心图表（单图表）
+    QChartView* m_chartView = nullptr;       // 图表视图
+    QValueAxis* m_axisX = nullptr;           // X轴（数据点索引）
+    QValueAxis* m_axisY = nullptr;           // Y轴（数据值）
     QList<QLineSeries*> m_seriesList; // 存储多条曲线（同一图表内）
 
     qint64 m_totalPoints = 0;      // 累计数据点数量（X轴坐标）

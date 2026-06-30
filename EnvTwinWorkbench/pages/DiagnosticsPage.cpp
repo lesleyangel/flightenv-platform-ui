@@ -161,7 +161,7 @@ DiagnosticsPage::DiagnosticsPage(
     }
     for (const QString& family :
          {QStringLiteral("state_transition"), QStringLiteral("observation_equation"),
-          QStringLiteral("filter_algorithm"), QStringLiteral("qoi")}) {
+          QStringLiteral("qoi")}) {
         const int count = familyCounts[family];
         addCheck(preTable,
                  QStringLiteral("算子族 · %1").arg(family),

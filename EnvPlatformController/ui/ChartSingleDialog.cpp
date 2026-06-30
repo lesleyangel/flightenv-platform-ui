@@ -15,6 +15,9 @@ void ChartSingleDialog::initChart(const QString& title) {
     // 1. 创建单图表
     m_chart = new QChart();
     m_chart->setTitle(title);
+    QFont titleFont = m_chart->titleFont();
+    titleFont.setPointSize(9);
+    m_chart->setTitleFont(titleFont);
     // --- 修改 1: 关闭动画以提升性能 ---
     m_chart->setAnimationOptions(QChart::NoAnimation);
     // --- 修改 2: 隐藏图例以节省空间 (如果不需要的话) ---
@@ -22,19 +25,21 @@ void ChartSingleDialog::initChart(const QString& title) {
 
     // --- 修改 3: 移除图表本身的边距 ---
     // 这是最关键的一步，它会移除图表内容与图表边框之间的空白区域
-    m_chart->setMargins(QMargins(0, 0, 0, 0));
+    applyReadableAxisLayout();
 
     // 2. X轴（数据点序号）
     m_axisX = new QValueAxis();
-    m_axisX->setLabelFormat("%d");
+    m_axisX->setLabelFormat("%.0f");
     m_axisX->setRange(0, MAX_VISIBLE);
     m_chart->addAxis(m_axisX, Qt::AlignBottom);
 
     // 3. Y轴（数据值）
     m_axisY = new QValueAxis();
-    m_axisY->setTitleText("数值");
+    m_axisY->setTitleText(QStringLiteral("数值"));
+    m_axisY->setLabelFormat("%.3g");
     m_axisY->setRange(0, 100);
     m_chart->addAxis(m_axisY, Qt::AlignLeft);
+    applyReadableAxisLayout();
 
     // 4. 图表视图（支持交互和抗锯齿）
     m_chartView = new QChartView(m_chart);
@@ -56,8 +61,39 @@ void ChartSingleDialog::initChart(const QString& title) {
     setLayout(mainLayout);
 }
 
+void ChartSingleDialog::applyReadableAxisLayout()
+{
+    if (!m_chart) {
+        return;
+    }
+
+    // Sensor cards are small; keep fixed readable room for Y labels instead of
+    // letting QtCharts squeeze them into ellipsis.
+    m_chart->setMargins(QMargins(64, 8, 12, 22));
+
+    QFont axisLabelFont;
+    axisLabelFont.setPointSize(8);
+    QFont axisTitleFont;
+    axisTitleFont.setPointSize(8);
+    axisTitleFont.setBold(true);
+
+    if (m_axisX) {
+        m_axisX->setLabelsFont(axisLabelFont);
+        m_axisX->setTitleFont(axisTitleFont);
+        m_axisX->setLabelsAngle(0);
+        m_axisX->setLabelFormat("%.0f");
+    }
+    if (m_axisY) {
+        m_axisY->setLabelsFont(axisLabelFont);
+        m_axisY->setTitleFont(axisTitleFont);
+        m_axisY->setLabelsAngle(0);
+        m_axisY->setLabelFormat("%.3g");
+    }
+}
+
 void ChartSingleDialog::setTitleY(const QString& titley) {
     m_axisY->setTitleText(titley);
+    applyReadableAxisLayout();
 }
 
 void ChartSingleDialog::deleteChart() {
@@ -178,11 +214,14 @@ void ChartSingleDialog::updateChartXYData(const std::vector<double>& x, const st
     double yMargin = (maxY - minY) * 0.1;
     if (yMargin < 1e-9) yMargin = qMax(1.0, qAbs(maxY) * 0.1);
     m_axisY->setRange(minY - yMargin, maxY + yMargin);
+    m_axisY->setLabelFormat("%.3g");
+    applyReadableAxisLayout();
 
     // ===== 修正部分：强制刷新标题 =====
     if (m_axisY && m_chart->axes().contains(m_axisY)) {
         m_axisY->setTitleText(m_axisY->titleText()); // 如果动态更新，可传入新的titley参数
         m_axisY->applyNiceNumbers();
+        applyReadableAxisLayout();
         m_chart->update();
     }
 
@@ -308,6 +347,7 @@ void ChartSingleDialog::updateChartData(const std::vector<std::vector<double>>& 
     }
     else {
         m_axisY->setRange(0, 100);
+        applyReadableAxisLayout();
         qWarning() << "无有效数据，Y轴使用默认范围";
     }
 }

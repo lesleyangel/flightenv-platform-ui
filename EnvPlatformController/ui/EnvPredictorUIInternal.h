@@ -61,8 +61,11 @@ std::filesystem::path platformUiRunConfigPath(const std::filesystem::path& works
 QString findNewestSummary(const QString& relativeDir, const QString& fileName);
 QJsonObject readJsonObject(const QString& path);
 QString jsonNumberText(const QJsonObject& object, const QString& key, const QString& fallback = QStringLiteral("-"));
+QString workspaceResolvedPath(const QString& pathOrUri);
+QString workspaceDisplayPath(const QString& pathOrUri);
 QString objectPackagePath(const QString& relativePath);
 QString objectResourcePath(const QString& pathOrUri);
+QString objectResourceDisplayPath(const QString& pathOrUri);
 
 struct PlatformUiRunConfig {
     int online_frames = 70;
@@ -82,6 +85,9 @@ launchsupport::PlatformControllerBackendOptions platformBackendOptions(bool comp
 
 QJsonObject platformBallisticPreview(const QJsonObject& frame);
 QString platformFieldIdentityKey(const launchsupport::PlatformFieldArtifactView& field);
+QString platformFieldDisplayName(const QString& rawName);
+QString platformComponentDisplayName(const QString& rawName);
+QString platformFieldDisplayLabelFromKey(const QString& identityKey);
 QString platformFieldTitle(const launchsupport::PlatformFieldArtifactView& field);
 bool isRenderablePlatformField(const launchsupport::PlatformFieldArtifactView& field);
 contracts::SubjectType inferPlatformFieldSubject(

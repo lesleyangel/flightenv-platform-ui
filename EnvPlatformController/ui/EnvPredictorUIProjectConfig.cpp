@@ -10,14 +10,19 @@
 #include <QFileInfo>
 #include <QFileDialog>
 #include <QGridLayout>
+#include <QGroupBox>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QLayout>
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QPlainTextEdit>
 #include <QProcess>
 #include <QProcessEnvironment>
 #include <QPushButton>
+#include <QScrollArea>
+#include <QSet>
+#include <QSizePolicy>
 #include <QVBoxLayout>
 
 #include <algorithm>
@@ -268,6 +273,99 @@ std::vector<std::string> subject_checks(QCheckBox* p, QCheckBox* k, QCheckBox* s
     return values;
 }
 
+bool is_legacy_training_control_name(const QString& name)
+{
+    static const QStringList prefixes = {
+        QStringLiteral("lineEdit_BPNNInvert_"),
+        QStringLiteral("lineEdit_PODInvert_"),
+        QStringLiteral("lineEdit_BPNNForecast_"),
+        QStringLiteral("lineEdit_Invert_"),
+        QStringLiteral("lineEdit_Forecast_"),
+        QStringLiteral("comboBox_InvertType"),
+        QStringLiteral("comboBox_ForecastType"),
+        QStringLiteral("checkBox_BPNNInvert"),
+        QStringLiteral("checkBox_BPNNForecast"),
+        QStringLiteral("checkBox_PODInvert"),
+        QStringLiteral("checkBox_Invert"),
+        QStringLiteral("checkBox_Forecast"),
+        QStringLiteral("checkBox_IOInvert"),
+        QStringLiteral("checkBox_IOForecast")
+    };
+
+    for (const QString& prefix : prefixes) {
+        if (name.startsWith(prefix)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void polish_legacy_training_layout(QLayout* layout)
+{
+    if (!layout) {
+        return;
+    }
+    layout->setSpacing(std::max(layout->spacing(), 6));
+    layout->setSizeConstraint(QLayout::SetMinimumSize);
+
+    int left = 0;
+    int top = 0;
+    int right = 0;
+    int bottom = 0;
+    layout->getContentsMargins(&left, &top, &right, &bottom);
+    layout->setContentsMargins(
+        std::max(left, 6),
+        std::max(top, 6),
+        std::max(right, 6),
+        std::max(bottom, 6));
+
+    if (auto* grid = qobject_cast<QGridLayout*>(layout)) {
+        grid->setHorizontalSpacing(std::max(grid->horizontalSpacing(), 8));
+        grid->setVerticalSpacing(std::max(grid->verticalSpacing(), 6));
+    }
+}
+
+void polish_legacy_training_control(QWidget* control)
+{
+    if (!control) {
+        return;
+    }
+    control->setMinimumHeight(22);
+    control->setMaximumHeight(28);
+    QSizePolicy policy = control->sizePolicy();
+    policy.setHorizontalPolicy(QSizePolicy::Expanding);
+    policy.setVerticalPolicy(QSizePolicy::Fixed);
+    control->setSizePolicy(policy);
+}
+
+int legacy_training_group_target_height(QGroupBox* box)
+{
+    if (!box) {
+        return 0;
+    }
+
+    const int lineEdits = box->findChildren<QLineEdit*>().size();
+    const int combos = box->findChildren<QComboBox*>().size();
+    const int checks = box->findChildren<QCheckBox*>().size();
+    const int controls = lineEdits + combos + checks;
+
+    // Do not force the large model blocks to grow.  They are page sections and
+    // making them tall pushes the training log panel off 1080p screens.
+    if (controls >= 16) {
+        return 0;
+    }
+    if (controls >= 10) {
+        return 185;
+    }
+    if (controls >= 6) {
+        return 135;
+    }
+    if (controls >= 3) {
+        return 90;
+    }
+    return 0;
+}
+
 struct PodUi {
     QLineEdit* base_order = nullptr;
     QLineEdit* energy_ratio = nullptr;
@@ -434,26 +532,95 @@ QString EnvPredictorUI::workspaceRootPath_() const
     return native_path(QDir::currentPath());
 }
 
+QString EnvPredictorUI::resolveWorkspacePath_(const QString& path) const
+{
+    QString text = QDir::fromNativeSeparators(path.trimmed());
+    if (text.isEmpty()) {
+        return {};
+    }
+
+    const QFileInfo directInfo(text);
+    if (directInfo.isAbsolute() && directInfo.exists()) {
+        return native_path(directInfo.absoluteFilePath());
+    }
+
+    const QStringList portableRoots = {
+        QStringLiteral("_deps"),
+        QStringLiteral("_local_artifacts"),
+        QStringLiteral("flightenv-object-reentry-vehicle"),
+        QStringLiteral("flightenv-platform-pdk")
+    };
+    for (const QString& rootName : portableRoots) {
+        const QString marker = QStringLiteral("/") + rootName + QStringLiteral("/");
+        const int markerIndex = text.indexOf(marker, 0, Qt::CaseInsensitive);
+        if (markerIndex >= 0) {
+            const QString relative = text.mid(markerIndex + 1);
+            return native_path(QDir(workspaceRootPath_()).filePath(relative));
+        }
+        if (text.startsWith(rootName + QStringLiteral("/"), Qt::CaseInsensitive)) {
+            return native_path(QDir(workspaceRootPath_()).filePath(text));
+        }
+    }
+
+    if (directInfo.isAbsolute()) {
+        return native_path(text);
+    }
+    return native_path(QDir(workspaceRootPath_()).filePath(text));
+}
+
+QString EnvPredictorUI::displayWorkspacePath_(const QString& path) const
+{
+    QString text = QDir::fromNativeSeparators(path.trimmed());
+    if (text.isEmpty()) {
+        return {};
+    }
+
+    const QStringList portableRoots = {
+        QStringLiteral("_deps"),
+        QStringLiteral("_local_artifacts"),
+        QStringLiteral("flightenv-object-reentry-vehicle"),
+        QStringLiteral("flightenv-platform-pdk")
+    };
+    for (const QString& rootName : portableRoots) {
+        const QString marker = QStringLiteral("/") + rootName + QStringLiteral("/");
+        const int markerIndex = text.indexOf(marker, 0, Qt::CaseInsensitive);
+        if (markerIndex >= 0) {
+            return native_path(text.mid(markerIndex + 1));
+        }
+        if (text.startsWith(rootName + QStringLiteral("/"), Qt::CaseInsensitive)) {
+            return native_path(text);
+        }
+    }
+
+    const QFileInfo info(resolveWorkspacePath_(text));
+    const QDir root(workspaceRootPath_());
+    const QString relative = root.relativeFilePath(info.absoluteFilePath());
+    if (!relative.startsWith(QStringLiteral(".."))) {
+        return native_path(relative);
+    }
+    return native_path(text);
+}
+
 QString EnvPredictorUI::defaultTrainingProjectConfigPath_() const
 {
-    return native_path(QDir(workspaceRootPath_()).filePath(QStringLiteral("_deps/example/launcher_local_test_cfg.json")));
+    return native_path(QStringLiteral("_deps/example/launcher_local_test_cfg.json"));
 }
 
 QString EnvPredictorUI::defaultTrainingOutputRootPath_() const
 {
-    return native_path(QDir(workspaceRootPath_()).filePath(QStringLiteral("_local_artifacts/platform-ui-training")));
+    return native_path(QStringLiteral("_local_artifacts/platform-ui-training"));
 }
 
 QString EnvPredictorUI::currentTrainingProjectConfigPath_() const
 {
     const QString text = trainingProjectConfigEdit_ ? trainingProjectConfigEdit_->text().trimmed() : QString();
-    return text.isEmpty() ? defaultTrainingProjectConfigPath_() : native_path(text);
+    return resolveWorkspacePath_(text.isEmpty() ? defaultTrainingProjectConfigPath_() : text);
 }
 
 QString EnvPredictorUI::currentTrainingOutputRootPath_() const
 {
     const QString text = trainingOutputRootEdit_ ? trainingOutputRootEdit_->text().trimmed() : QString();
-    return text.isEmpty() ? defaultTrainingOutputRootPath_() : native_path(text);
+    return resolveWorkspacePath_(text.isEmpty() ? defaultTrainingOutputRootPath_() : text);
 }
 
 void EnvPredictorUI::setTrainingStatus_(const QString& text)
@@ -552,7 +719,7 @@ void EnvPredictorUI::buildTrainingCliControls_(QVBoxLayout* layout, QWidget* par
     trainingSensorIdsEdit_->setText(QStringLiteral("[8,9,7,6]"));
     trainingBaseIdsEdit_->setText(QStringLiteral("{}"));
     if (ui.lineEdit_DDFN_1 && !ui.lineEdit_DDFN_1->text().trimmed().isEmpty()) {
-        trainingDbPathEdit_->setText(ui.lineEdit_DDFN_1->text().trimmed());
+        trainingDbPathEdit_->setText(displayWorkspacePath_(ui.lineEdit_DDFN_1->text().trimmed()));
     }
 
     connect(trainingLoadConfigButton_, &QPushButton::clicked, this, [this]() {
@@ -562,7 +729,7 @@ void EnvPredictorUI::buildTrainingCliControls_(QVBoxLayout* layout, QWidget* par
             currentTrainingProjectConfigPath_(),
             QStringLiteral("JSON (*.json);;All files (*.*)"));
         if (!path.isEmpty()) {
-            trainingProjectConfigEdit_->setText(native_path(path));
+            trainingProjectConfigEdit_->setText(displayWorkspacePath_(path));
             loadTrainingProjectConfig_(path);
         }
     });
@@ -576,7 +743,7 @@ void EnvPredictorUI::buildTrainingCliControls_(QVBoxLayout* layout, QWidget* par
             currentTrainingProjectConfigPath_(),
             QStringLiteral("JSON (*.json);;All files (*.*)"));
         if (!path.isEmpty()) {
-            trainingProjectConfigEdit_->setText(native_path(path));
+            trainingProjectConfigEdit_->setText(displayWorkspacePath_(path));
             saveTrainingProjectConfig_(path);
         }
     });
@@ -584,10 +751,10 @@ void EnvPredictorUI::buildTrainingCliControls_(QVBoxLayout* layout, QWidget* par
         const QString path = QFileDialog::getOpenFileName(
             this,
             QStringLiteral("选择训练数据库"),
-            trainingDbPathEdit_ ? trainingDbPathEdit_->text() : workspaceRootPath_(),
+            trainingDbPathEdit_ ? resolveWorkspacePath_(trainingDbPathEdit_->text()) : workspaceRootPath_(),
             QStringLiteral("SQLite DB (*.db *.sqlite *.sqlite3);;All files (*.*)"));
         if (!path.isEmpty() && trainingDbPathEdit_) {
-            trainingDbPathEdit_->setText(native_path(path));
+            trainingDbPathEdit_->setText(displayWorkspacePath_(path));
         }
     });
     connect(trainingOutputBrowseButton_, &QPushButton::clicked, this, [this]() {
@@ -596,7 +763,7 @@ void EnvPredictorUI::buildTrainingCliControls_(QVBoxLayout* layout, QWidget* par
             QStringLiteral("选择训练输出目录"),
             currentTrainingOutputRootPath_());
         if (!dir.isEmpty() && trainingOutputRootEdit_) {
-            trainingOutputRootEdit_->setText(native_path(dir));
+            trainingOutputRootEdit_->setText(displayWorkspacePath_(dir));
         }
     });
     connect(trainingStartButton_, &QPushButton::clicked, this, &EnvPredictorUI::startTrainingCli_);
@@ -632,21 +799,101 @@ void EnvPredictorUI::hideLegacyInlineTrainingButtons_()
     }
 }
 
+void EnvPredictorUI::polishLegacyTrainingForms_()
+{
+    // The legacy model-training pages are still generated by the old .ui file.
+    // Give their parameter controls stable row heights so Qt cannot squeeze rows
+    // into each other on 1080p screens or packaged runtimes with different fonts.
+    QSet<QGroupBox*> touchedGroups;
+
+    auto visitControl = [&](QWidget* control) {
+        if (!control || !is_legacy_training_control_name(control->objectName())) {
+            return;
+        }
+
+        polish_legacy_training_control(control);
+
+        for (QWidget* parent = control->parentWidget(); parent; parent = parent->parentWidget()) {
+            polish_legacy_training_layout(parent->layout());
+
+            if (auto* group = qobject_cast<QGroupBox*>(parent)) {
+                touchedGroups.insert(group);
+            }
+
+            if (auto* scroll = qobject_cast<QScrollArea*>(parent)) {
+                scroll->setWidgetResizable(true);
+            }
+
+            if (parent == ui.tab) {
+                break;
+            }
+        }
+    };
+
+    for (QLineEdit* edit : findChildren<QLineEdit*>()) {
+        visitControl(edit);
+    }
+    for (QComboBox* combo : findChildren<QComboBox*>()) {
+        visitControl(combo);
+    }
+    for (QCheckBox* check : findChildren<QCheckBox*>()) {
+        visitControl(check);
+    }
+
+    for (QGroupBox* group : touchedGroups) {
+        if (!group) {
+            continue;
+        }
+
+        polish_legacy_training_layout(group->layout());
+        for (QLayout* layout : group->findChildren<QLayout*>()) {
+            polish_legacy_training_layout(layout);
+        }
+        for (QLineEdit* edit : group->findChildren<QLineEdit*>()) {
+            polish_legacy_training_control(edit);
+        }
+        for (QComboBox* combo : group->findChildren<QComboBox*>()) {
+            polish_legacy_training_control(combo);
+        }
+        for (QCheckBox* check : group->findChildren<QCheckBox*>()) {
+            polish_legacy_training_control(check);
+        }
+
+        if (group->layout()) {
+            group->layout()->activate();
+        }
+
+        int minimumHeight = std::max(group->minimumHeight(), legacy_training_group_target_height(group));
+        if (minimumHeight > 0) {
+            minimumHeight = std::max(minimumHeight, group->sizeHint().height());
+        }
+        QSizePolicy policy = group->sizePolicy();
+        policy.setHorizontalPolicy(QSizePolicy::Expanding);
+        policy.setVerticalPolicy(QSizePolicy::Preferred);
+        group->setSizePolicy(policy);
+
+        if (minimumHeight > 0 && group->minimumHeight() < minimumHeight) {
+            group->setMinimumHeight(minimumHeight);
+        }
+    }
+}
+
 bool EnvPredictorUI::loadTrainingProjectConfig_(const QString& path)
 {
     try {
-        const QString projectPath = native_path(path);
+        const QString projectPath = resolveWorkspacePath_(path);
         json project = read_json_file(projectPath);
         json model = load_model_json(projectPath, project);
 
         if (trainingProjectConfigEdit_) {
-            trainingProjectConfigEdit_->setText(projectPath);
+            trainingProjectConfigEdit_->setText(displayWorkspacePath_(projectPath));
         }
 
         const json data = model.value("data", json::object());
         const QString dbPath = QString::fromStdString(data.value("db_path", std::string{}));
-        set_line(ui.lineEdit_DDFN_1, dbPath);
-        set_line(trainingDbPathEdit_, dbPath);
+        const QString dbDisplayPath = displayWorkspacePath_(dbPath);
+        set_line(ui.lineEdit_DDFN_1, dbDisplayPath);
+        set_line(trainingDbPathEdit_, dbDisplayPath);
         const std::vector<int> trainIds = data.contains("task_train_ids") && data.at("task_train_ids").is_array()
             ? data.at("task_train_ids").get<std::vector<int>>()
             : std::vector<int>{data.value("task_train_id", 1)};
@@ -709,7 +956,7 @@ bool EnvPredictorUI::loadTrainingProjectConfig_(const QString& path)
             ui.comboBox_FDFN_1->setCurrentIndex(resamplerIndex);
         }
 
-        setTrainingStatus_(QStringLiteral("已读取训练 cfg：%1").arg(projectPath));
+        setTrainingStatus_(QStringLiteral("已读取训练 cfg：%1").arg(displayWorkspacePath_(projectPath)));
         return true;
     } catch (const std::exception& e) {
         const QString message = QStringLiteral("读取训练 cfg 失败：%1").arg(QString::fromStdString(e.what()));
@@ -722,11 +969,11 @@ bool EnvPredictorUI::loadTrainingProjectConfig_(const QString& path)
 bool EnvPredictorUI::saveTrainingProjectConfig_(const QString& path)
 {
     try {
-        const QString projectPath = native_path(path.trimmed().isEmpty() ? currentTrainingProjectConfigPath_() : path);
+        const QString projectPath = resolveWorkspacePath_(path.trimmed().isEmpty() ? currentTrainingProjectConfigPath_() : path);
         json project = QFileInfo::exists(projectPath) ? read_json_file(projectPath) : json::object();
         json model = QFileInfo::exists(projectPath) ? load_model_json(projectPath, project) : json::object();
 
-        const QString dbPathText = trainingDbPathEdit_ ? trainingDbPathEdit_->text().trimmed() : ui.lineEdit_DDFN_1->text().trimmed();
+        const QString dbPathText = displayWorkspacePath_(trainingDbPathEdit_ ? trainingDbPathEdit_->text().trimmed() : ui.lineEdit_DDFN_1->text().trimmed());
         const QString trainIdsInput = trainingTaskIdsEdit_ ? trainingTaskIdsEdit_->text() : ui.lineEdit_DDFN_2->text();
         const QString fieldIdsInput = trainingFieldIdsEdit_ ? trainingFieldIdsEdit_->text() : ui.lineEdit_DDFN_3->text();
         const QString sensorIdsInput = trainingSensorIdsEdit_ ? trainingSensorIdsEdit_->text() : ui.lineEdit_DDFN_4->text();
@@ -803,7 +1050,8 @@ bool EnvPredictorUI::saveTrainingProjectConfig_(const QString& path)
 
         write_json_file(modelPath, model);
         write_json_file(projectPath, project);
-        setTrainingStatus_(QStringLiteral("已保存 cfg：%1；model：%2").arg(projectPath, modelPath));
+        setTrainingStatus_(QStringLiteral("已保存 cfg：%1；model：%2")
+            .arg(displayWorkspacePath_(projectPath), displayWorkspacePath_(modelPath)));
         return true;
     } catch (const std::exception& e) {
         const QString message = QStringLiteral("保存训练 cfg 失败：%1").arg(QString::fromStdString(e.what()));

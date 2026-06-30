@@ -210,7 +210,7 @@ void WorkflowDagWidget::paintEvent(QPaintEvent* event)
     auto familyColor = [](const QString& family) -> QColor {
         if (family == QStringLiteral("state_transition")) return QColor(37, 99, 235);
         if (family == QStringLiteral("observation_equation")) return QColor(13, 148, 136);
-        if (family == QStringLiteral("filter_algorithm")) return QColor(217, 119, 6);
+        if (family == QStringLiteral("estimation_system")) return QColor(217, 119, 6);
         if (family == QStringLiteral("qoi")) return QColor(190, 24, 93);
         return QColor(100, 116, 139);
     };

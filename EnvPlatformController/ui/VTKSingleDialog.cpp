@@ -15,6 +15,7 @@
 #include <QStyleOption>
 #include <QPainter>
 #include <QPointer>
+#include <algorithm>
 
 VTKSingleDialog::VTKSingleDialog(
     const std::string& windowTitle,
@@ -117,33 +118,28 @@ void VTKSingleDialog::initVTKComponents() {
 
     scalarBar = vtkSmartPointer<vtkScalarBarActor>::New();
     scalarBar->SetLookupTable(colorTable);
-    scalarBar->SetNumberOfLabels(5);
-    scalarBar->SetLabelFormat("%.2f");
+    scalarBar->SetNumberOfLabels(4);
+    scalarBar->SetLabelFormat("%.3g");
     scalarBar->SetOrientationToVertical();
+    scalarBar->UnconstrainedFontSizeOn();
 
     // 标题文字属性
     vtkSmartPointer<vtkTextProperty> titleProp = vtkSmartPointer<vtkTextProperty>::New();
-    titleProp->SetFontSize(20);
+    titleProp->SetFontFamilyToArial();
+    titleProp->SetFontSize(10);
     titleProp->SetBold(true);
     titleProp->SetColor(0, 0, 0);
     scalarBar->SetTitleTextProperty(titleProp);
 
     // 标签文字属性
     vtkSmartPointer<vtkTextProperty> labelProp = vtkSmartPointer<vtkTextProperty>::New();
-    labelProp->SetFontSize(14);
+    labelProp->SetFontFamilyToArial();
+    labelProp->SetFontSize(11);
+    labelProp->SetBold(false);
     labelProp->SetColor(0, 0, 0);
     scalarBar->SetLabelTextProperty(labelProp);
 
-    // 归一化视口坐标
-    double xPos = 0.003;    //默认左
-    double yPos = 0.4;    // 默认上
-    scalarBar->SetPosition(xPos, yPos);
-
-    // 颜色条宽高
-    double width = 0.1; 
-    double height = 0.65;
-    scalarBar->SetWidth(width);
-    scalarBar->SetHeight(height);
+    updateScalarBarLayout();
 
     renderer = vtkSmartPointer<vtkRenderer>::New();
     renderer->AddActor(actor);
@@ -205,6 +201,50 @@ void VTKSingleDialog::paintEvent(QPaintEvent* event)
 bool VTKSingleDialog::RemoveActor() {
     renderer->RemoveActor2D(scalarBar);
     return 0;
+}
+
+void VTKSingleDialog::updateScalarBarLayout()
+{
+    if (!scalarBar) {
+        return;
+    }
+
+    int widthPx = vtkWidget ? vtkWidget->width() : 0;
+    int heightPx = vtkWidget ? vtkWidget->height() : 0;
+    if ((widthPx <= 0 || heightPx <= 0) && renderWindow) {
+        int* size = renderWindow->GetSize();
+        widthPx = size ? size[0] : widthPx;
+        heightPx = size ? size[1] : heightPx;
+    }
+    if (widthPx <= 0 || heightPx <= 0) {
+        widthPx = 360;
+        heightPx = 240;
+    }
+
+    const int barWidthPx = std::clamp(widthPx / 9, 58, 82);
+    const int barHeightPx = std::clamp(heightPx * 3 / 5, 118, std::max(118, heightPx - 30));
+    const int marginPx = 12;
+    const int yPx = std::max(8, (heightPx - barHeightPx) / 2);
+
+    scalarBar->SetPosition(
+        static_cast<double>(marginPx) / static_cast<double>(widthPx),
+        static_cast<double>(yPx) / static_cast<double>(heightPx));
+    scalarBar->SetWidth(static_cast<double>(barWidthPx) / static_cast<double>(widthPx));
+    scalarBar->SetHeight(static_cast<double>(barHeightPx) / static_cast<double>(heightPx));
+    scalarBar->SetNumberOfLabels(4);
+    scalarBar->SetLabelFormat("%.3g");
+
+    if (auto* title = scalarBar->GetTitleTextProperty()) {
+        title->SetFontFamilyToArial();
+        title->SetFontSize(10);
+        title->SetBold(true);
+    }
+    if (auto* label = scalarBar->GetLabelTextProperty()) {
+        label->SetFontFamilyToArial();
+        label->SetFontSize(11);
+        label->SetBold(false);
+    }
+    scalarBar->Modified();
 }
 
 void VTKSingleDialog::setRuntimeView(std::shared_ptr<const launchsupport::RuntimeViewModel> view) {
@@ -564,6 +604,7 @@ void VTKSingleDialog::renderVTK(const std::vector<double>& pointValues) {
         colorTable->Modified();
         mapper->SetScalarRange(minVal, maxVal);
         scalarBar->SetLookupTable(colorTable);
+        updateScalarBarLayout();
         scalarBar->Modified();
         lastMin = minVal;
         lastMax = maxVal;
@@ -801,6 +842,7 @@ void VTKSingleDialog::resizeEvent(QResizeEvent* event)
     QWidget::resizeEvent(event);
     if (vtkWidget) {
         vtkWidget->resize(event->size());
+        updateScalarBarLayout();
         if (renderWindow) renderWindow->Render();
     }
 }

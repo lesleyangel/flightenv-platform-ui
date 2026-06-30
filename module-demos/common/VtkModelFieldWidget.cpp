@@ -9,6 +9,7 @@
 #include <vtkCamera.h>
 #include <vtkPointData.h>
 #include <vtkProperty.h>
+#include <vtkTextProperty.h>
 #include <vtkTriangle.h>
 
 #include <algorithm>
@@ -47,18 +48,21 @@ QString subjectText(contracts::SubjectType subject)
 VtkModelFieldWidget::VtkModelFieldWidget(QWidget* parent)
     : QWidget(parent)
 {
-    setMinimumSize(620, 420);
+    setMinimumSize(420, 260);
     layout_ = new QVBoxLayout(this);
     layout_->setContentsMargins(0, 0, 0, 0);
-    layout_->setSpacing(6);
+    layout_->setSpacing(3);
 
     statusLabel_ = new QLabel(QStringLiteral("等待 RuntimeSnapshotDTO 和真实场值"));
     statusLabel_->setWordWrap(true);
+    statusLabel_->setMaximumHeight(36);
     statusLabel_->setStyleSheet(QStringLiteral(
-        "background:#fff7ed;border:1px solid #fed7aa;border-radius:4px;padding:6px;color:#9a3412;"));
+        "background:#fff7ed;border:1px solid #fed7aa;border-radius:4px;padding:3px 5px;"
+        "color:#9a3412;font-size:11px;"));
     layout_->addWidget(statusLabel_);
 
     vtkWidget_ = new QVTKOpenGLNativeWidget(this);
+    vtkWidget_->setMinimumSize(360, 210);
     layout_->addWidget(vtkWidget_, 1);
 
     lookup_ = vtkSmartPointer<vtkLookupTable>::New();
@@ -90,12 +94,14 @@ VtkModelFieldWidget::VtkModelFieldWidget(QWidget* parent)
 
     scalarBar_ = vtkSmartPointer<vtkScalarBarActor>::New();
     scalarBar_->SetLookupTable(lookup_);
-    scalarBar_->SetNumberOfLabels(5);
+    scalarBar_->SetNumberOfLabels(4);
     scalarBar_->SetLabelFormat("%.3g");
     scalarBar_->SetOrientationToVertical();
-    scalarBar_->SetWidth(0.10);
-    scalarBar_->SetHeight(0.62);
-    scalarBar_->SetPosition(0.02, 0.28);
+    scalarBar_->SetWidth(0.075);
+    scalarBar_->SetHeight(0.50);
+    scalarBar_->SetPosition(0.025, 0.30);
+    scalarBar_->GetTitleTextProperty()->SetFontSize(10);
+    scalarBar_->GetLabelTextProperty()->SetFontSize(9);
 
     renderer_ = vtkSmartPointer<vtkRenderer>::New();
     renderer_->SetBackground(0xEE / 255.0, 0xEA / 255.0, 0xE3 / 255.0);
@@ -241,9 +247,48 @@ VtkFieldRenderStats VtkModelFieldWidget::renderPlatformFieldArtifact(
 
     QString displayTitle = title;
     if (displayTitle.isEmpty()) {
-        displayTitle = QString::fromStdString(field.field_name.empty() ? field.port_id : field.field_name);
+        auto displayFieldName = [](const std::string& raw) -> QString {
+            const QString key = QString::fromStdString(raw).trimmed().toLower();
+            if (key == QStringLiteral("pressure") || key.contains(QStringLiteral("field.pressure")) || key.contains(QStringLiteral("aero_pressure"))) {
+                return QStringLiteral("气动压力场");
+            }
+            if (key == QStringLiteral("heatflux") || key == QStringLiteral("heat_flux") || key.contains(QStringLiteral("field.heatflux")) || key.contains(QStringLiteral("aero_heatflux"))) {
+                return QStringLiteral("气动热流场");
+            }
+            if (key == QStringLiteral("strain") || key.contains(QStringLiteral("field.strain")) || key.contains(QStringLiteral("structure_strain"))) {
+                return QStringLiteral("结构应变场");
+            }
+            if (key == QStringLiteral("temperature") || key.contains(QStringLiteral("field.temperature")) || key.contains(QStringLiteral("structure_temperature"))) {
+                return QStringLiteral("结构温度场");
+            }
+            if (key == QStringLiteral("damage") || key.contains(QStringLiteral("field.damage")) || key.contains(QStringLiteral("structure_damage"))) {
+                return QStringLiteral("结构损伤场");
+            }
+            if (key == QStringLiteral("ablation") || key.contains(QStringLiteral("field.ablation")) || key.contains(QStringLiteral("tps_ablation"))) {
+                return QStringLiteral("防热烧蚀场");
+            }
+            if (key == QStringLiteral("rul") || key == QStringLiteral("life") || key == QStringLiteral("remaining_life") || key.contains(QStringLiteral("field.rul")) || key.contains(QStringLiteral("remaining_life"))) {
+                return QStringLiteral("剩余寿命场");
+            }
+            return QString::fromStdString(raw);
+        };
+        auto displayComponentName = [](const std::string& raw) -> QString {
+            const QString key = QString::fromStdString(raw).trimmed().toLower();
+            if (key == QStringLiteral("shell")) {
+                return QStringLiteral("外壳");
+            }
+            if (key == QStringLiteral("structure")) {
+                return QStringLiteral("结构");
+            }
+            if (key == QStringLiteral("tps")) {
+                return QStringLiteral("防热层");
+            }
+            return QString::fromStdString(raw);
+        };
+
+        displayTitle = displayFieldName(field.field_name.empty() ? field.port_id : field.field_name);
         if (!field.component_id.empty()) {
-            displayTitle += QStringLiteral(" / ") + QString::fromStdString(field.component_id);
+            displayTitle += QStringLiteral(" / ") + displayComponentName(field.component_id);
         }
     }
     return renderFlattenedValues(
@@ -458,7 +503,7 @@ bool VtkModelFieldWidget::loadIndexedSurface(const QString& path, const contract
     surface_->Modified();
     actor_->GetProperty()->SetRepresentationToSurface();
     renderer_->ResetCamera();
-    renderer_->GetActiveCamera()->Zoom(1.5);
+    renderer_->GetActiveCamera()->Zoom(1.12);
     return true;
 }
 

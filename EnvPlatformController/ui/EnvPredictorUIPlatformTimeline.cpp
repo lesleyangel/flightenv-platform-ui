@@ -739,7 +739,27 @@ void EnvPredictorUI::renderPlatformCurrentFrame()
     }
     platformLastRenderedFrameSignature_ = frameSignature;
 
+    platformUiLogInfo(
+        "Platform field render: branch=%s loop=%d fields=%zu snapshot_fields=%zu",
+        platformCurrentBranchId_.toStdString().c_str(),
+        platformCurrentLoop_,
+        fields.size(),
+        platform_snapshot_.field_artifacts.size());
+
     platformFieldOrder_.clear();
+
+    if (fields.empty()) {
+        if (platformFrameStatusLabel_) {
+            platformFrameStatusLabel_->setText(
+                QStringLiteral("当前分支/帧没有可渲染场：branch=%1 loop=%2，总场=%3")
+                    .arg(platformCurrentBranchId_)
+                    .arg(platformCurrentLoop_)
+                    .arg(static_cast<int>(platform_snapshot_.field_artifacts.size())));
+        }
+        renderGraphPlatformFieldArtifacts_();
+        updatePlatformSensorDisplayForLoop(platformCurrentLoop_);
+        return;
+    }
 
     for (const auto& field : fields) {
         const QString key = platformFieldIdentityKey(field);
@@ -751,7 +771,7 @@ void EnvPredictorUI::renderPlatformCurrentFrame()
         auto*& widget = platformFieldWidgets_[key];
         if (widget == nullptr) {
             widget = new flightenv::ui::demo::VtkModelFieldWidget(vtkContainer);
-            widget->setMinimumHeight(300);
+            widget->setMinimumHeight(220);
             widget->setAssetRoot(workspacePath(QStringLiteral("_deps/example")));
             widget->setRuntimeSnapshot(runtime_view_->snapshot);
         }
@@ -875,11 +895,7 @@ void EnvPredictorUI::rebuildPlatformFieldVisibilityControls()
         if (widgetIt == platformFieldWidgets_.end() || widgetIt->second == nullptr) {
             continue;
         }
-        QString label = key;
-        const int firstSeparator = label.indexOf(QLatin1Char('|'));
-        if (firstSeparator >= 0) {
-            label = label.left(firstSeparator);
-        }
+        const QString label = platformFieldDisplayLabelFromKey(key);
         auto* check = new QCheckBox(label, platformFieldCheckContainer_);
         check->setProperty("fieldKey", key);
         check->setChecked(platformFieldVisibility_.find(key) == platformFieldVisibility_.end()
@@ -1087,7 +1103,7 @@ void EnvPredictorUI::loadPlatformSensorFrames()
         : configuredObjectRoot;
     const auto configuredStream = environmentPath("FLIGHTENV_PLATFORM_EXTERNAL_OBSERVATION_STREAM");
     const auto streamPath = configuredStream.empty()
-        ? (objectRoot / "fixtures" / "sensor_stream_db70.json")
+        ? (objectRoot / "fixtures" / "sensor_stream_db70_real_db.json")
         : configuredStream;
 
     QFile streamFile(platformPathText(streamPath));

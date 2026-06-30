@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>2287</width>
-    <height>1080</height>
+    <width>1600</width>
+    <height>900</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -34,8 +34,8 @@ QMainWindow {
 
     background-repeat: no-repeat;
     background-position: center;
-    min-width: 1920px;
-    min-height: 1080px;
+    min-width: 1280px;
+    min-height: 720px;
 }
 
 

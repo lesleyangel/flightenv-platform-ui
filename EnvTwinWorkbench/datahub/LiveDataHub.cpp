@@ -251,34 +251,28 @@ QString latestRuntimeRunDirUnder(const QString& evidenceRoot) {
     return bestDir;
 }
 
-QJsonObject particleFilterSummary(const QJsonObject& node) {
+QJsonObject estimationFrameSummary(const QJsonObject& frame) {
     QJsonObject out;
-    const QJsonObject runtimePacket = node.value(QStringLiteral("runtime_packet")).toObject();
-    const QJsonObject payload = runtimePacket.value(QStringLiteral("payload")).toObject();
-    const QJsonObject outputs = payload.value(QStringLiteral("outputs")).toObject();
-    const QJsonObject posterior = outputs.value(QStringLiteral("state.posterior")).toObject();
-    const QJsonObject uncertainty = posterior.value(QStringLiteral("uncertainty")).toObject();
-    const QJsonObject components = posterior.value(QStringLiteral("components")).toObject();
-    const QJsonObject ballistic = components.value(QStringLiteral("ballistic")).toObject();
-
+    const QJsonObject diagnostics = frame.value(QStringLiteral("diagnostics")).toObject();
+    out.insert(QStringLiteral("frame_index"), frame.value(QStringLiteral("frame_index")).toInt());
+    out.insert(QStringLiteral("sample_time_s"), frame.value(QStringLiteral("sample_time_s")).toDouble());
+    out.insert(QStringLiteral("posterior_checkpoint"),
+               frame.value(QStringLiteral("posterior_checkpoint")).toString());
+    out.insert(QStringLiteral("method_particle_count"),
+               diagnostics.value(QStringLiteral("particle_count")).toInt());
     out.insert(QStringLiteral("effective_sample_size"),
-               uncertainty.value(QStringLiteral("effective_sample_size")).toDouble());
-    out.insert(QStringLiteral("normalized_effective_sample_size"),
-               uncertainty.value(QStringLiteral("normalized_effective_sample_size")).toDouble());
-    out.insert(QStringLiteral("particle_count"),
-               uncertainty.value(QStringLiteral("particle_count")).toInt());
-    out.insert(QStringLiteral("observation_residual_norm"),
-               uncertainty.value(QStringLiteral("max_abs_residual")).toDouble());
-    out.insert(QStringLiteral("resampled"),
-               uncertainty.value(QStringLiteral("resampled")).toBool());
-    out.insert(QStringLiteral("posterior_altitude_m"),
-               ballistic.value(QStringLiteral("h")).toDouble());
-    out.insert(QStringLiteral("posterior_mach"),
-               ballistic.value(QStringLiteral("ma")).toDouble());
-    out.insert(QStringLiteral("posterior_time_s"),
-               ballistic.value(QStringLiteral("time_s")).toDouble());
-    out.insert(QStringLiteral("status"),
-               posterior.value(QStringLiteral("filter_status")).toString());
+               diagnostics.value(QStringLiteral("ess")).toDouble());
+    out.insert(QStringLiteral("resampling_count"),
+               diagnostics.value(QStringLiteral("resampling_count")).toInt());
+    out.insert(QStringLiteral("sigma_point_count"),
+               diagnostics.value(QStringLiteral("sigma_point_count")).toInt());
+    out.insert(QStringLiteral("innovation_norm"),
+               diagnostics.value(QStringLiteral("innovation_norm")).toDouble());
+    out.insert(QStringLiteral("posterior_cov_trace"),
+               diagnostics.value(QStringLiteral("posterior_cov_trace")).toDouble());
+    out.insert(QStringLiteral("jitter_count"),
+               diagnostics.value(QStringLiteral("jitter_count")).toInt());
+    out.insert(QStringLiteral("status"), QStringLiteral("ok"));
     return out;
 }
 
@@ -663,28 +657,29 @@ QJsonObject buildPlatformRunTimeline(const QString& runDir) {
     const QDir dir(runDir);
     const QJsonObject sensorStream = readJsonObject(dir.filePath(QStringLiteral("sensor_stream.json")));
     const QJsonObject nodeSnapshot = readJsonObject(dir.filePath(QStringLiteral("runtime_node_snapshot.json")));
-    if (sensorStream.isEmpty() && nodeSnapshot.isEmpty()) {
+    const QJsonObject estimationEvidence = readJsonObject(dir.filePath(QStringLiteral("estimation_evidence.json")));
+    if (sensorStream.isEmpty() && nodeSnapshot.isEmpty() && estimationEvidence.isEmpty()) {
         return {};
     }
 
-    QHash<int, QJsonObject> filtersByIteration;
-    for (const QJsonValue& value : nodeSnapshot.value(QStringLiteral("nodes")).toArray()) {
-        const QJsonObject node = value.toObject();
-        if (node.value(QStringLiteral("operator_id")).toString() != QStringLiteral("reentry.particle_filter.atomic.v1")) {
-            continue;
-        }
-        filtersByIteration.insert(node.value(QStringLiteral("loop_iteration_index")).toInt(),
-                                  particleFilterSummary(node));
+    QHash<int, QJsonObject> estimationsByIteration;
+    for (const QJsonValue& value : estimationEvidence.value(QStringLiteral("frames")).toArray()) {
+        const QJsonObject frame = value.toObject();
+        estimationsByIteration.insert(frame.value(QStringLiteral("frame_index")).toInt(),
+                                      estimationFrameSummary(frame));
     }
 
     QJsonArray onlineFrames;
-    const QJsonArray frames = sensorStream.value(QStringLiteral("frames")).toArray();
+    QJsonArray frames = sensorStream.value(QStringLiteral("frames")).toArray();
+    if (frames.isEmpty()) {
+        frames = estimationEvidence.value(QStringLiteral("frames")).toArray();
+    }
     for (const QJsonValue& value : frames) {
         QJsonObject frame = value.toObject();
         const int loopIndex = frame.value(QStringLiteral("loop_iteration_index"))
                                   .toInt(frame.value(QStringLiteral("frame_index")).toInt());
-        if (filtersByIteration.contains(loopIndex)) {
-            frame.insert(QStringLiteral("filter"), filtersByIteration.value(loopIndex));
+        if (estimationsByIteration.contains(loopIndex)) {
+            frame.insert(QStringLiteral("estimation"), estimationsByIteration.value(loopIndex));
         }
         onlineFrames.push_back(frame);
     }

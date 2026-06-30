@@ -198,9 +198,12 @@ private:
     void buildRuntimeChainPage_();
     void buildTrainingCliControls_(QVBoxLayout* layout, QWidget* parent);
     void hideLegacyInlineTrainingButtons_();
+    void polishLegacyTrainingForms_();
     void refreshRuntimeChainPage_();
     void applyPlatformRunConfigFromUi_();
     QString workspaceRootPath_() const;
+    QString resolveWorkspacePath_(const QString& path) const;
+    QString displayWorkspacePath_(const QString& path) const;
     QString defaultTrainingProjectConfigPath_() const;
     QString defaultTrainingOutputRootPath_() const;
     QString currentTrainingProjectConfigPath_() const;

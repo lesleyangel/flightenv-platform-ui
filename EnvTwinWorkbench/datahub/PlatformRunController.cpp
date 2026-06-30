@@ -218,6 +218,7 @@ QString resolveExternalObservationStreamPath(const QString& workspaceRoot, const
         return profilePath;
     }
     return firstExistingFile({
+        objectDir.filePath(QStringLiteral("fixtures/sensor_stream_db70_real_db.json")),
         objectDir.filePath(QStringLiteral("fixtures/sensor_stream_db70.json")),
         objectDir.filePath(QStringLiteral("fixtures/sensor_stream.json")),
         objectDir.filePath(QStringLiteral("fixtures/external_observation_stream.json")),
